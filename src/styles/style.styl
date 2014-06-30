@@ -1,0 +1,224 @@
+@import url('http://meyerweb.com/eric/tools/css/reset/reset.css')
+@require '_fonts'
+@require '_fontello'
+@require '_functions'
+@require '_spinner'
+
+body
+  font-size 100%
+  background-image url(../assets/triangles-pattern.jpg)
+  background-repeat repeat
+  min-height 100vh
+
+body
+  font-family 'PT Sans', sans-serif
+
+@keyframes bumpBottom
+  0%
+    transform translate(0, 5%)
+    opacity 0
+  100%
+    transform translate(0, 0)
+    opacity 1
+
+
+.station
+  flex-shrink 0
+  flex-grow 1
+  flex-basis 200px
+  margin 10px
+  min-width 200px
+  max-width 400px
+  position relative
+  overflow hidden
+  animation bumpBottom .75s ease-out
+  square('after')
+  vingette-bg()
+  perspective 250px
+
+  &-actions
+    position absolute
+    left 0
+    top 0
+    width 100%
+    height 100%
+    opacity .2
+    transition opacity .25s ease-in-out
+  &:hover &-actions
+   opacity 1
+
+  &-action
+    color white
+    position absolute
+    left 0
+    top 0
+    right 0
+    bottom 70px
+    margin auto
+    font-size 2.5em
+    width 0
+    height 0
+    padding 48px
+    border-radius 5em
+    background rgba(0,0,0,.8)
+    icon('play')
+    cursor pointer
+    overflow hidden
+    &::before
+      font-size 2em
+      margin-left: -33px
+      margin-top: -39px
+
+  &-info
+      position absolute
+      bottom 0
+      width 100%
+      padding 10%
+      box-sizing border-box
+      background rgba(0, 0, 0, .8)
+      color white
+      & > *:first-child
+        margin-top 0
+        padding-top 0
+      h4, .now
+        display: block
+        white-space: nowrap
+        overflow: hidden
+        text-overflow: ellipsis
+
+      transition all .15s ease
+      opacity .75
+      transform rotateX(50deg)
+      transform-origin 0 100%
+  &:hover &-info
+
+    opacity 1
+    transform rotateX(0)
+
+.taglist
+  display flex
+  justify-content flex-start
+  flex-wrap wrap
+  padding 0
+  margin 0
+  li
+    list-style none
+  &-tag
+
+    padding-right 5px
+    font-size .8rem
+
+.player
+  width 100%
+  background white
+  &-container
+    display flex
+    flex-wrap wrap
+    width 100%
+    padding 0 10px
+    box-sizing border-box
+  &-element-group
+    padding 10px 0
+    flex-grow 1
+    flex-shrink 0
+    &-fixed
+      flex-grow 0
+  &-button
+    &-playpause
+      font-size 2.5rem
+      &.is-play
+        icon('pause')
+      &.is-pause
+        icon('play')
+    &-like
+      font-size 1.25em
+      icon('heart')
+    &-skip
+      font-size 1.25em
+      icon('heart-broken')
+  &-info
+    vertical-align top
+    &.is-title
+      font-size 1.5rem
+    &.is-prev
+      &::before
+        content: 'last: '
+    &.is-station
+      font-size 1.5rem
+      &::before
+        content: 'Station: '
+
+
+
+
+footer
+  position fixed
+  bottom 0
+
+main
+  display flex
+  flex-wrap wrap
+  margin-bottom 7.5rem
+  & > .csspinner
+    position: absolute
+    top: 50%
+    left: 50%
+  & > .csspinner:not(:only-child)
+    display none
+
+.popups
+  position absolute
+  left 0
+  top 0
+  z-index 2
+.popup
+  position fixed
+  width 200px
+  height 200px
+  max-width 100%
+  max-height 100%
+  left 0
+  top 0
+  right 0
+  bottom 0
+  margin auto
+  background white
+  display flex
+  align-items center
+  justify-content center
+  & > *
+    z-index 2
+  &::before
+    content ''
+    position absolute
+    width 200vw
+    height 200vh
+    margin -100vh 0 0 -100vw
+    background rgba(0,0,0,.8)
+  &::after
+    content ''
+    position absolute
+    left 0
+    top 0
+    width 100%
+    height 100%
+    background white
+    z-index 1
+  &-button
+    display block
+    &.is-vk
+      background-color #345F88
+    color white
+    padding 10px
+    border-radius 3px
+    cursor pointer
+
+@keyframes rotate
+  0%
+    transform rotate(360deg)
+  100%
+    transform rotate(0deg)
+
+
+.popup:not(:target)
+  display: none

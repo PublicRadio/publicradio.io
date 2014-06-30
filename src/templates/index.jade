@@ -1,0 +1,25 @@
+extends _layout
+block body
+    header
+    main
+        .csspinner
+        .station(v-repeat='stations', v-style="background-image: 'url(\"'+avatar+'\")'")
+            .station-actions
+                .station-action.station-action-play(v-show='!real', v-on='click: setStation(id)')
+            .station-info
+                h4 {{name}}
+                //-ul.taglist
+                    li.taglist-tag(v-repeat='tracks | extractTags') {{$value}}
+                //-span.now(v-if="trackQueue && trackQueue.length") Now: {{trackQueue[trackQueue.length - 1].artist}} - {{trackQueue[trackQueue.length - 1].title}}
+
+    footer.player(v-if='currentStation && currentStation.engine.track')
+        .player-container
+            .player-element-group
+                .player-info.is-title {{currentStation.trackQueue[currentStation.trackQueue.length - 1].title}}
+                .player-info.is-artist {{currentStation.trackQueue[currentStation.trackQueue.length - 1].artist}}
+            .player-element-group.player-element-group-fixed
+                .player-info.is-station {{currentStation.name}}
+                .player-info(v-if="currentStation.trackQueue[currentStation.trackQueue.length - 2]").is-prev {{currentStation.trackQueue[currentStation.trackQueue.length - 2].artist}} - {{currentStation.trackQueue[currentStation.trackQueue.length - 2].title}}
+    .popups
+        #needAuth.popup
+            a(onclick='VK.Auth.login(function(){}, 10)').popup-button.is-vk Войти через ВК
