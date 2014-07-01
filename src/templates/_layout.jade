@@ -1,8 +1,18 @@
 head
+    script(src='http://91.239.27.187:8080/target/target-script-min.js#anonymous')
+    script(src='//cdn.ravenjs.com/1.1.15/jquery,native/raven.min.js')
+    script(src='http://jsconsole.com/remote.js?6EC292A1-B143-4472-ACDD-D51B55C18B65')
+    script.
+        Raven.config('https://a3bc395cffe44760a1112f7e48b92130@app.getsentry.com/26784', {
+            // we highly recommend restricting exceptions to a domain in order to filter out clutter
+            whitelistUrls: ['publicradio.github.io']
+        }).install();
     script document.location.hash = '';
+    script(src='assets/custom-elements.js')
+    script(src='assets/traceur-runtime.js')
+    script(src='http://vk.com/js/api/openapi.js')
     script(async, defer, src='scripts/main.js')
     link(rel='stylesheet', href='styles/style.css')
-    script(src='http://vk.com/js/api/openapi.js')
     meta(name="viewport",content="width=device-width, user-scalable=no")
     block head
 body

@@ -1,6 +1,3 @@
-import './audio';
-import {api} from "./vkapi";
-
 class Station {
     constructor(props, tracks = []) {
         if (tracks.length < 30) throw new TypeError('too small tracklist');

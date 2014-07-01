@@ -1,6 +1,6 @@
-import co from 'co';
-import Station from './station.js';
-var tasks = [];
+var co = require('co'),
+    Station = require('./station').Station,
+    tasks = [];
 
 window.TrackDB = window.TrackDB || {};
 
@@ -69,14 +69,14 @@ function searchStations(query, priority) {
 export {getUserStations, searchStations, loadStation};
 
 
-var api = function api(method, args, priority = 0) {
+function api(method, args, priority = 0) {
     return new Promise(resolve => tasks.push({
         created_at: Date.now(),
         priority  : Math.floor(Number(priority) || 0),
         callback  : resolve,
         method, args
     }))
-};
+}
 
 
 void function init() {

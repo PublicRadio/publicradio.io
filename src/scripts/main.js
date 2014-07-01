@@ -1,9 +1,8 @@
-require('./traceur-runtime');
-import {Station} from '../lib/station';
-import {getUserStations} from '../lib/vkapi';
-
+require('../lib/audio.js');
 var Vue = require('vue'),
     page = require('page'),
+    Station = require('../lib/station').Station,
+    getUserStations = require('../lib/vkapi').getUserStations,
     ready = require('../lib/ready'),
     el = document.documentElement,
     vm = window.vm = new Vue({

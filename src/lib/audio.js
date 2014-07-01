@@ -42,8 +42,8 @@ var MockAudioPrototype = Object.create(HTMLElement.prototype, {
 
     } }
 });
-
-Object.defineProperty(window, 'HTMLMockAudio', {value: document.registerElement('mock-audio', {prototype: MockAudioPrototype})});
+var HTMLMockAudio = document.register('mock-audio', {prototype: MockAudioPrototype});
+export {HTMLMockAudio};
 
 /*
  var assert = require('assert'),
