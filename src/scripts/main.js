@@ -22,7 +22,7 @@ Station.onRegister = function (station) {
 getUserStations();
 
 page('*', function ({querystring}) {
-    loadStation(querystring.split('&')[0])
+    Station.load(querystring.split('&')[0])
         .then(function (station) {
             station.play();
             data.currentStation = station.dump;

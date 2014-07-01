@@ -78,4 +78,17 @@ Station.find = function findStation(nameOrId) {
         || Station.all.filter((s)=>s.name === nameOrId)[0];
 };
 
+Station.load = function loadStation(nameOrId) {
+    return new Promise(function (resolve){
+        if (nameOrId instanceof Station)
+            return resolve(nameOrId);
+
+        var station = Station.find(nameOrId);
+        if (station)
+            return resolve(nameOrId);
+
+
+    });
+};
+
 export {Station};

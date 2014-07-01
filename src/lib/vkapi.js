@@ -24,6 +24,10 @@ function createGroupLoadPromise(priority, {items}) {
         }
     }).filter(a=>a))
 }
+function getStationInfo(group_id, priority) {
+    return api('groups.getById', {group_id}, priority)
+        .then(([groupInfo]) =>  groupInfo ? loadStation(groupInfo) : Promise.reject() );
+}
 
 function loadStation(groupInfo, priority) {
     var station = Station.find(record.id);
@@ -66,7 +70,7 @@ function searchStations(query, priority) {
         .then(createGroupLoadPromise.bind(this, priority));
 }
 
-export {getUserStations, searchStations, loadStation};
+module.exports = {getUserStations, searchStations, getStationInfo, loadStation};
 
 
 function api(method, args, priority = 0) {
@@ -82,9 +86,16 @@ function api(method, args, priority = 0) {
 void function init() {
     VK.init({apiId: 4360607});
     new Promise(function authPromise(resolve) {
-        VK.Observer.subscribe('auth.login', authPromise.bind(this, resolve));
-        VK.Auth.getLoginStatus(({sess}) => sess ? resolve(sess) : document.location.hash = 'needAuth');
-    }).then(function (session) {
+        VK.Auth.getLoginStatus(function({session}){
+            if (session){
+                resolve(session);
+            } else {
+                VK.Observer.subscribe('auth.login', resolve);
+                document.location.hash = 'needAuth';
+            }
+        });
+    })
+        .then(function (session) {
             document.location.hash = '';
             var timeout = 350,
                 UP_K = 1.1,
