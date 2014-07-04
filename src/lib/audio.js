@@ -30,6 +30,7 @@ var MockAudioPrototype = Object.create(HTMLElement.prototype, {
     },
     createdCallback: { value() {
         var timeout;
+        this.pause = function(){};
         this.addEventListener('canplay', () => { if (this.autoplay) this.play() });
         this.addEventListener('playing', () => this.dispatchEvent(new Event('seeking')));
         this.addEventListener('seeking', () => {
@@ -42,8 +43,7 @@ var MockAudioPrototype = Object.create(HTMLElement.prototype, {
 
     } }
 });
-var HTMLMockAudio = document.register('mock-audio', {prototype: MockAudioPrototype});
-export {HTMLMockAudio};
+document.register('mock-audio', {prototype: MockAudioPrototype});
 
 /*
  var assert = require('assert'),
