@@ -104,11 +104,13 @@ module.exports = function player(overrides) {
                 self.on(event, callback);
             },
             destroy: function () {
+                player.pause();
                 stopEventInterval();
                 delete player.src;
                 player.removeEventListener('ended', ended);
                 player.removeEventListener('error', error);
             }
+
         }, {
             volume     : {
                 get: function () { return player.volume; },
@@ -197,5 +199,4 @@ module.exports = function player(overrides) {
             if (listeners.length === 0) stopEventInterval();
         }
     };
-
 };

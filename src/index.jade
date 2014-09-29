@@ -1,8 +1,13 @@
 doctype html
 html
     head
-        script(async,defer,src='//vk.com/js/api/openapi.js')
         meta(charset='utf8')
         title Public radio
+        script(async,defer,src='//vk.com/js/api/openapi.js')
+        link(rel='stylesheet', href='style.css')
     body
+        #content
+        .popups
+            #needAuth.popup
+                a(onclick='VK.Auth.login(function(){}, 10)').popup-button.is-vk Войти через ВК
         script(async,defer,src='app.js')

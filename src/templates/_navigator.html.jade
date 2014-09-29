@@ -1,0 +1,18 @@
+.player-container(v-if='currentStation && currentTrack')
+    .player-element-group
+        .left
+            .player-info.is-title {{currentTrack.title}}
+                span(v-if='currentTrack.release') from {{currentTrack.release.title}}
+                    span(v-if='currentTrack.release.date') ({{currentTrack.release.date.getYear()}})
+            .player-info.is-artist {{currentTrack.artist}}
+        .right
+            .player-info.is-avatar(
+            v-if='currentTrack.release && currentTrack.release.image',
+            style='background-image: url({{currentTrack.release.image.original}})')
+    .player-element-group
+        .left
+            .player-info.is-avatar(v-if='currentStation.avatar', style='background-image: url({{currentStation.avatar}})')
+        .right
+            .player-info.is-station {{currentStation.name}}
+            //-.player-info.is-prev(v-if="currentStation.previousTrack")
+                | {{currentStation.previousTrack.artist}} - {{currentStation.previousTrack.title}}

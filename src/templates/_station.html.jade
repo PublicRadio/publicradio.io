@@ -1,0 +1,5 @@
+a.station(style="background-image: url({{avatar}})", data-name='{{screen_name}}', v-if='shown')
+    .station-actions
+        .station-action.station-action-play(v-on="click: setAsCurrent")
+    .station-info
+        h4 {{name}}

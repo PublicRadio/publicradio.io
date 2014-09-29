@@ -1,0 +1,9 @@
+main
+    .csspinner
+    //- vue hack: "true" is compared only if (val != null) => shown === false will cause failure
+    .station-container(v-repeat="stations | orderBy 'genreCompatibility' -1", v-component='station')
+    .station-container(v-repeat="suggestedStations| orderBy 'genreCompatibility' -1", v-component='station')
+footer.player
+    .player-container(v-component='navigator')
+.popups
+    #needAuth.popup: a(onclick='VK.Auth.login(function(){}, 10)').popup-button.is-vk Войти через ВК

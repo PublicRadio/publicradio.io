@@ -1,0 +1,12 @@
+main
+    .csspinner
+    .station(v-repeat='station: stations', v-style="background-image: 'url(\"'+station.photo_200+'\")'", v-class='current: station.isCurrent')
+        .station-actions
+            .station-action.station-action-play(v-show='!station.isCurrent', v-on='click: setStation(station.id)')
+        .station-info
+            h4 {{station.name}}
+footer.player
+    .player-container
+
+.popups
+    #needAuth.popup: a(onclick='VK.Auth.login(function(){}, 10)').popup-button.is-vk Войти через ВК
