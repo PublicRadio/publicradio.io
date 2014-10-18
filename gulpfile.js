@@ -23,14 +23,14 @@ gulp.task('build-js', function () {
 });
 
 gulp.task('build-html', function () {
-    return gulp.src(['src/**/[^_]*.jade', 'src/[^_]**/*.jade'])
+    return gulp.src('src/**/[^_]*.jade')
         .pipe(plugins.jade()).on('error', log)
         .pipe(gulp.dest('build'));
 });
 gulp.task('build-css', function () {
-    return gulp.src(['src/**/[^_]*.styl', 'src/[^_]**/*.styl'])
+    return gulp.src('src/**/[^_]*.styl')
         .pipe(plugins.stylus()).on('error', log)
-        .pipe(plugins.autoprefixer('last 2 Chrome versions')).on('error', log)
+        .pipe(plugins.autoprefixer()).on('error', log)
         .pipe(gulp.dest('build'));
 });
 

@@ -1,9 +1,52 @@
-main
-    .csspinner
-    //- vue hack: "true" is compared only if (val != null) => shown === false will cause failure
-    .station-container(v-repeat="stations | orderBy 'genreCompatibility' -1", v-component='station')
-    .station-container(v-repeat="suggestedStations| orderBy 'genreCompatibility' -1", v-component='station')
-footer.player
-    .player-container(v-component='navigator')
 .popups
-    #needAuth.popup: a(onclick='VK.Auth.login(function(){}, 10)').popup-button.is-vk Войти через ВК
+    .popup(v-if='anchor === "needAuth"')
+        p Public radio - это экспериментальный музыкальный проект.
+        p Он превращает музыкальные группы и паблики из Вконтакте в музыкальные радиостанции, отсортированные по вашим музыкальным вкусам.
+        p Он подбирает подходящие станции как из ваших, так и из специально отобранных для этой цели групп.
+        p Publuc radio - некоммерческий проект. Он создан исключительно для того, чтобы получать еще больше удовольствия от новой музыки.
+        p Обратите внимание: для нормальной работы Public Radio необходимо высокоскоростное подключение к сети.
+        a(onclick='VK.Auth.login(function(){}, 10)').popup-button.is-vk Войти через ВК
+header.header
+    //-.nav-button
+        svg(viewbox='0 0 24 24', height='100%', width='100%', preserveaspectratio='xMidYMid meet', fit='', style='pointer-events: none; display: block;')
+            g: path(d='M3,18h18v-2H3V18z M3,13h18v-2H3V13z M3,6v2h18V6H3z', fill="white")
+    span
+        span(v-show="currentStation.name")
+            a(href="http://vk.com/{{currentStation.screen_name}}", target="_blank") {{currentStation.name}}
+            | &nbsp;on&nbsp;
+        a(href="https://vk.com/public.radio", target="_blank") Public Radio
+    .like(v-show='currentStation.id', v-class='icon-like:!currentStation.is_member, icon-dislike: currentStation.is_member', data-tooltip="{{currentStation.is_member ? 'Отменить подписку' : 'Подписаться'}}")
+        #subscribeToGroup(style='opacity: 0; -webkit-transform: scale(2);-moz-transform: scale(2);transform: scale(2);width: 2em;height: 2em;margin: 12px 0 0 0px;')
+    .volume(v-class='icon-volume-mute: volume === 0, icon-volume: volume !== 0')
+        //v-show='currentStation.id',
+        .overlay
+            input(type='range', v-model='volume', value=0)
+    .stationArt(v-style="background-image: 'url('+ currentStation.avatar + ')'", v-tooltip-current-station)
+
+main
+    //- vue hack: "true" is compared only if (val != null) => shown === false will cause failure
+    article.station-container(
+    v-repeat="stations | threshold genreCompatibility 60",
+    v-component='station'
+    )
+
+    .preload-container
+        .csspinner(style='margin: -24px 20px 48px;')
+        .announce(style='text-align:center')
+            p Public radio получает необходимые данные из VK.
+            p Через 10-15 секунд вы уже сможете начать слушать станции, созданные из ваших групп VK.
+            br
+            p Загрузка музыкальных групп, которые могут вам понравиться, и расчет персональных рекомендаций может занять какое-то время.
+            p Первые несколько минут некоторые из предложенных станций могут не соответствовать вашим музыкальным вкусам.
+
+footer.player(v-show='currentStation && currentTrack')
+    .player-container
+        .albumArt(v-style="background-image: 'url('+ currentTrack.art.photo_604 + ')'")
+        .player-track-info
+            span.player-track-info-title {{currentTrack.title}}
+            //-span.player-track-info-album(v-show='currentTrack.release.title') &nbsp;(from "{{currentTrack.release.title}}" album
+                span(v-if='currentTrack.release.year') , {{currentTrack.release.year}})
+            .player-track-info-artist by {{currentTrack.artist || '???'}}
+        .like(v-class='icon-like:!currentTrack.added, icon-liked: currentTrack.added, disabled: currentTrack.added', v-on="click: likeCurrentTrack")
+
+        .player-progress(v-style='width: currentProgress * 100 + "%"')

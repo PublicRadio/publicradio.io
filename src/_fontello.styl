@@ -50,16 +50,59 @@ icon(name)
     /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3) */
 
     icons = {
-      'heart-broken': '\e800',
-      'pause': '\e804',
-      'heart-empty': '\e802',
-      'user': '\e805',
-      'group': '\e806',
-      'heart': '\e801',
-      'left-open': '\e807',
-      'right-open': '\e808',
-      'up-open': '\e809',
-      'play': '\e803',
-      'down-open': '\e80a'
+      'volume-mute': '\e800',
+      'volume': '\e801',
+      'heart': '\e802',
+      'heart-broken': '\e803',
+      'heart-empty': '\e804',
+      'play': '\e805'
+    }
+    content icons[name]
+
+icon2(name)
+  position relative
+  width 2em
+  height 2em
+  font-size 1em
+  line-height 2em
+  overflow hidden
+  cursor: pointer
+  &::before
+    transition transform .15s ease-in-out
+    transform scale(1)
+
+  &:hover::before
+    transform scale(1.5)
+  &::before
+    font-family: "fontello"
+    font-style: normal
+    font-weight: normal
+    speak: none
+
+    display: block
+    position: absolute
+    left 0
+    right 0
+    top 0
+    bottom 0
+    margin auto
+    text-decoration: inherit
+    text-align: center
+    /* opacity: .8 */
+
+    /* For safety - reset parent styles, that can break glyph codes*/
+    font-variant: normal
+    text-transform: none
+
+    /* Uncomment for 3D effect */
+    /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3) */
+
+    icons = {
+      'volume-mute': '\e800',
+      'volume': '\e801',
+      'heart': '\e802',
+      'heart-broken': '\e803',
+      'heart-empty': '\e804',
+      'play': '\e805'
     }
     content icons[name]

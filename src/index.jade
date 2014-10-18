@@ -1,13 +1,26 @@
 doctype html
 html
     head
-        meta(charset='utf8')
+        script.
+            window.qbaka||function(e,t){var n=[];var r=e.qbaka=function(){n.push(arguments)};e.__qbaka_eh=e.onerror;e.onerror=function(){r("onerror",arguments);if(e.__qbaka_eh)try{e.__qbaka_eh.apply(e,arguments)}catch(t){}};e.onerror.qbaka=1;r.sv=2;r._=n;r.log=function(){r("log",arguments)};r.report=function(){r("report",arguments,new Error)};var i=t.createElement("script"),s=t.getElementsByTagName("script")[0],o=function(){s.parentNode.insertBefore(i,s)};i.type="text/javascript";i.async=!0;i.src=("https:"==t.location.protocol?"https:":"http:")+"//qbaka.r.worldssl.net/reporting.js";typeof i.async=="undefined"&&t.addEventListener?t.addEventListener("DOMContentLoaded",o):o();r.key="2068f17a6354f08d45afeb7ba1e3afc1"}(window,document);qbaka.options={autoStacktrace:1,trackEvents:1};
+        meta(charset='utf-8')
+        meta(name='viewport', content='width=device-width, initial-scale=1, user-scalable=no')
         title Public radio
         script(async,defer,src='//vk.com/js/api/openapi.js')
         link(rel='stylesheet', href='style.css')
+
+        link(rel='icon', href='publicradio-mic-192.png')
+        link(rel='apple-touch-icon', href='publicradio-mic-192.png')
+        script(type="text/javascript", src="http://code.jquery.com/jquery-2.0.0.min.js")
+        link(rel="stylesheet", type="text/css", href="tooltipster.css" )
+        script(type="text/javascript", src="jquery.tooltipster.js")
+        meta(name="mobile-web-app-capable", content="yes")
+        meta(name="apple-mobile-web-app-capable", content="yes")
+
+        meta(property="og:title", content="Public Radio")
+        meta(property="og:description", content="Онлайн-радио из ваших и подобранных лично для вас пабликов Вконтакте. Слушайте лучшие и новые песни по-новому!")
+        meta(property="og:url", content="http://publicradio.io")
+        meta(property="og:image", content="http://publicradio.io/publicradio-mic-192.png")
     body
         #content
-        .popups
-            #needAuth.popup
-                a(onclick='VK.Auth.login(function(){}, 10)').popup-button.is-vk Войти через ВК
         script(async,defer,src='app.js')

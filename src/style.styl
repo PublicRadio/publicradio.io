@@ -1,6 +1,7 @@
 @import url('http://meyerweb.com/eric/tools/css/reset/reset.css')
 @import url('http://fonts.googleapis.com/css?family=PT+Sans:400,700&subset=latin,cyrillic')
 @require '_fontello'
+@require '_caviarDreams'
 square(pseudo = 'before')
   &::{pseudo}
     content ''
@@ -8,23 +9,6 @@ square(pseudo = 'before')
     padding-bottom 100%
     display inline-block
 
-vingette-bg()
-  background-size 0
-  &::before
-    content ''
-    width 100%
-    height 100%
-    position absolute
-    left 0
-    top 0
-    background-image inherit
-    background-size cover
-    background-repeat no-repeat
-    background-position center
-    transition all .5s ease-in-out
-    box-shadow inset 0 0 100px rgba(0, 0, 0, 1)
-  &.current::before
-    box-shadow inset 0 0 100px rgba(255, 255, 255, 1)
 
 
 /*
@@ -41,64 +25,61 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 /* (cs)spinner base styling */
 .csspinner {
-  position: relative;
+  position: relative
 }
 .csspinner:after {
-  z-index: 2;
-  content: "";
-  height: 40px;
-  width: 40px;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  margin: -20px 0 0 -20px;
-  -webkit-transition: all .75s ease 0s;
-  transition: all .75s ease 0s;
-  border-radius: 100%;
-  border-top: 4px solid #555555;
-  -webkit-animation: standard .75s infinite linear;
-  animation: standard .75s infinite linear;
-  -webkit-transform-origin: center;
-  -ms-transform-origin: center;
-  transform-origin: center;
+  z-index: 2
+  content: ""
+  height: 40px
+  width: 40px
+  position: absolute
+  top: 50%
+  left: 50%
+  margin: -20px 0 0 -20px
+  -webkit-transition: all .75s ease 0s
+  transition: all .75s ease 0s
+  border-radius: 100%
+  border-top: 4px solid #555555
+  -webkit-animation: standard .75s infinite linear
+  animation: standard .75s infinite linear
+  -webkit-transform-origin: center
+  -ms-transform-origin: center
+  transform-origin: center
 }
-/* (cs)spinner standard rotation animation used for duo, double-up etc. */
-@-webkit-keyframes standard {
-  from {
-    -webkit-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  to {
-    -webkit-transform: rotate(360deg);
-    transform: rotate(360deg);
-  }
-}
-@keyframes standard {
-  from {
-    -webkit-transform: rotate(0deg);
-    transform: rotate(0deg);
-  }
-  to {
-    -webkit-transform: rotate(360deg);
-    transform: rotate(360deg);
-  }
-}
+@keyframes standard
+  from
+    transform: rotate(0deg)
+  to
+    transform: rotate(360deg)
+
 /*(cs)spinner double up - a doubling up standard animation spinner*/
-.csspinner:after {
-  border-right: 4px solid #e74c3c;
-  border-top: 4px double #e74c3c;
-  border-left: 4px double #e74c3c;
-  border-bottom: 4px double #e74c3c;
+.csspinner:after
+  border: 4px double white
+  border-right-style: solid
+
+.disable-hover {
+  pointer-events: none
 }
 
+baseGreen1 = #aed581
+baseGreen2 = #8bc34a
+baseGreen3 = #33691e
+accentOrange1 = #ffab40
+accentOrange2 = #ff9100
+accentOrange3 = #ff6d00
+
+.csspinner:after
+  border-color: accentOrange3
+
+a
+  color inherit
 
 body
+  background black
   font-size 100%
   background-image url(triangles-pattern.jpg)
   background-repeat repeat
   min-height 100vh
-
-body
   font-family 'PT Sans', sans-serif
 
 @keyframes bumpBottom
@@ -109,196 +90,340 @@ body
     transform translate(0, 0)
     opacity 1
 
+#content
+  margin 68px 0
+  max-width 100%
+  overflow hidden
+
+header
+  font-family 'Caviar Dreams'
+  color white
+  z-index: 100
+  box-shadow 0 5px 15px rgba(0,0,0,.26)
+  background accentOrange3
+  height 68px
+  transition all .15s ease-in-out
+  width 100%
+  position fixed
+  left 0
+  top 0
+  display: flex
+  align-items center
+  a
+    font-weight bold
+  .stationArt
+    position: absolute
+    right: 0
+    top 0
+    width 68px
+    height 68px
+    background-size cover
+    background-position center
+  & > *
+    margin-left 24px
+header,footer
+  .like
+    position: absolute
+    right: 68px
+    top: 0
+    bottom: 0
+    margin: auto
+
+main
+  min-height 100vh
+  transition all .15s ease-in-out
+  box-sizing border-box
+  & > .csspinner
+    position: absolute
+    top: 50%
+    left: 50%
+
+
 .station-container
+  display inline-block
+  border 0 solid transparent
+  box-sizing border-box
   text-align center
-  min-width 200px
-  min-height 200px
-  flex-grow 1
+
+  margin -2px 0
+  overflow hidden
   &:empty
     display none
 
-.station
-  display inline-block
-  width 200px
-  height 200px
-  margin 10px
-  position relative
-  overflow hidden
-  animation bumpBottom .75s ease-out
-  square('after')
-  vingette-bg()
-  perspective 250px
+maxWidth = 200
+.station-container
+  width (100 / 3)%
+for count in 4 5 6 8 9 10 12 15 18 20
+  @media (min-width: (count * maxWidth)px)
+    .station-container
+      width (100 / count)%
 
-  &-actions
+
+.icon-liked
+  icon2('heart')
+.icon-like
+  icon2('heart-empty')
+.icon-dislike
+  icon2('heart-broken')
+.icon-volume
+  icon2('volume')
+.icon-volume-mute
+  icon2('volume-mute')
+
+.volume
+  position relative
+  overflow inherit
+  &::before
+    translate all .25s ease-in
+    z-index 10
+  &:hover::before
+    color: darkgray
+  &:not(:hover) .overlay
+    display: none
+  .overlay
+    box-shadow: 0 0 10px 3px rgba(0,0,0,0.46)
     position absolute
     left 0
     top 0
+    height 100%
+    padding 0 10px 0 100%
+    width 200px
+    background white
+    transform rotate(90deg)
+    transform-origin 16px
+  input[type="range"]
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    border: 0;
+    -webkit-appearance: none;
+    outline none
+
+    &::-webkit-slider-runnable-track
+      background rgba(black, .26)
+      height 6px
+    &::-moz-range-track
+      background rgba(black, .26)
+      height 6px
+    &::-ms-track
+      background rgba(black, .26)
+      height 6px
+    &::-ms-fill-lower
+      background rgba(accentOrange3, .26)
+    &::-webkit-slider-thumb
+      background accentOrange3
+      height: 16px;
+      width: 16px;
+      border-radius: 22px;
+      margin: -5px;
+      margin-left: 0;
+      border: none;
+      -webkit-appearance: none;
+    &::-moz-range-thumb
+      background accentOrange3
+      height: 16px;
+      width: 16px;
+      border-radius: 22px;
+      margin: -5px;
+      margin-left: 0;
+      border: none;
+    &::-ms-thumb
+      background accentOrange3
+      height: 16px;
+      width: 16px;
+      border-radius: 22px;
+      margin: -5px;
+      margin-left: 0;
+      border: none;
+.station
+  display block
+  width 100%
+  &::after
+    content: ''
+    display: block
+    width: 0
+    padding-bottom 100%
+  position relative
+  background-size cover
+  &:not(.noAnimation)
+    animation bumpBottom .75s ease-out
+  &:not(.current)
+    cursor pointer
+  //vingette
+  &::before
+    content ''
     width 100%
     height 100%
-    opacity .2
-    transition opacity .25s ease-in-out
-  &:hover &-actions
-    opacity 1
+    position absolute
+    left 0
+    top 0
+    background-image url('vingette.png')
+    background-size cover
+    transition all .5s ease-in-out
+  .station-info
+    font-family 'Caviar Dreams'
+    transition all .5s ease-in-out
+  &::before
+    filter invert(0%)
+  &:hover::before
+    filter invert(40%)
+  &.current::before, &.current:hover::before
+    filter invert(100%)
+  &.current .station-info
+    filter invert(100%)
 
-  &-action
-    color white
+  &-action-play
     position absolute
     left 0
     top 0
     right 0
     bottom 30px
+    opacity .2
+    transition opacity .25s ease-in-out
+    color white
     margin auto
     font-size 2.5em
     width 0
     height 0
     padding 48px
     border-radius 5em
-    background rgba(0,0,0,.8)
+    background rgba(0,0,0,.87)
     icon('play')
     cursor pointer
     overflow hidden
     &::before
-      font-size: 50px;
-      line-height: 0;
-      width: 0;
+      font-size: 50px
+      line-height: 0
+      width: 0
       margin 3px 0 0 -11px
-      display: block;
+      display: block
       box-shadow 0 0 30px #FFF
 
+  &:hover &-action-play
+    opacity 1
   &-info
     position absolute
     bottom 0
     width 100%
-    padding 10%
+    height 68px
+    padding 16px
     box-sizing border-box
-    background rgba(0, 0, 0, .8)
+    background rgb(0, 0, 0)
     color white
-    & > *:first-child
-      margin-top 0
-      padding-top 0
-    h4, .now
-      display: block
-      white-space: nowrap
-      overflow: hidden
-      text-overflow: ellipsis
+    &-line
+      white-space nowrap
+      text-overflow ellipsis
+      overflow hidden
+      font-size 12px
+      line-height 16px
+      &:first-child
+        font-size 16px
+    opacity .54
+    &, &-line
+      transform translateY(0)
+      transition all .15s ease-in-out
+    &
+      transform translateY(20px)
 
-    transition all .15s ease
-    opacity .75
-    transform rotateX(50deg) translateY(0)
-    transform-origin 0 100%
-  &:hover &-info
-    opacity 1
-    transform rotateX(50deg) translateY(12px)
-  &.current &-info
-    transform rotateX(60deg) translateY(0px)
-  &.current:hover &-info
-    transform rotateX(60deg) translateY(12px)
+  &:hover, &.current
+    .station-info
+      opacity .87
+      &:not(.is-has-only-child)
+        transform translateY(0)
+      &-line:not(:first-child)
+        transform translateY(64px)
 
-.taglist
-  display flex
-  justify-content flex-start
-  flex-wrap wrap
-  padding 0
-  margin 0
-  li
-    list-style none
-  &-tag
-
-    padding-right 5px
-    font-size .8rem
+.nav-button
+  width 24px
+  height 24px
 
 .player
+  height 68px
   width 100%
   background white
-  &-container
-    display flex
-    flex-wrap wrap
-    justify-content space-between
-    width 100%
-    padding 0 10px
+  color rgba(black, .54)
+  box-shadow 0 -5px 15px rgba(0,0,0,.26)
+  .albumArt
+    height 68px
+    width 68px
+    position absolute
+    background-size cover
+    background-position center
+    top 0
+    right 0
+  .player-track-info
+    display block
+    height 68px
+    padding 16px
     box-sizing border-box
-  &-element-group
-    min-width 240px
-    max-width 360px
-    padding 10px 0
-    display flex
-    align-content space-between
-    .left
-      text-align left
-      flex-grow 1
-    .right
-      text-align right
-      flex-grow 1
-  &-button
-    &-playpause
-      font-size 2.5rem
-      &.is-play
-        icon('pause')
-      &.is-pause
-        icon('play')
-    &-like
+    width calc(100% - 68px)
+    position absolute
+    top 0
+    left 0
+  .player-progress
+    position absolute
+    height 2px
+    bottom 0
+    left 0
+    width 0
+    transition all .05s linear
+    background accentOrange3
+
+
+/*    &-like
       font-size 1.25em
       icon('heart')
     &-skip
       font-size 1.25em
-      icon('heart-broken')
-  &-info
-    display block
-    vertical-align top
-    &.is-title
-      font-size 1.5rem
-    &.is-prev
-      &::before
-        content: 'last: '
-    &.is-station
-      font-size 1.5rem
-      &::before
-        content: 'Station: '
-    &.is-avatar
-      width 48px
-      height 48px
-      background-position center
-      background-size cover
+      icon('heart-broken')*/
 
+.preload-container:not(:only-child)
+  display none
 
-
+.player-track-info-title, .station-track-info-name
+  font-size 16px
+  color rgba(black, .87)
 
 footer
   position fixed
   bottom 0
-
-main
-  display flex
-  justify-content space-around
-  flex-wrap wrap
-  margin-bottom 7.5rem
-  & > .csspinner
-    position: absolute
-    top: 50%
-    left: 50%
-  & > .csspinner:not(:only-child)
-    display none
-
+  .icon
+    filter inverse(100%)
 .popups
   position absolute
   left 0
   top 0
-  z-index 2
+  z-index 1000
+header, footer, main
+  transition all .25s ease-in
+  transform scale(1)
+  filter none
+  transform-origin 50vw 50vh
+.popups:not(:empty)
+  & ~ header, & ~ footer
+    transform scale(.95)
+    filter blur(2px)
+  & ~ main
+    transform scale(.9)
+    filter blur(5px)
 .popup
-  position fixed
-  width 200px
-  height 200px
-  max-width 100%
-  max-height 100%
-  left 0
-  top 0
-  right 0
-  bottom 0
-  margin auto
-  background white
-  display flex
-  align-items center
-  justify-content center
+  position: fixed
+  width: 400px
+  height: 300px
+  max-width: 100%
+  max-height: 100%
+  left: 0
+  top: 0
+  right: 0
+  bottom: 0
+  margin: auto
+  background: #fff
+  display: flex
+  align-items: center
+  justify-content: space-between
+  flex-direction: column
+  padding: 10px
+  text-align: justify
   & > *
     z-index 2
   &::before
@@ -333,5 +458,17 @@ main
     transform rotate(0deg)
 
 
-.popup:not(:target)
-  display: none
+#subscribeToGroup
+  width: 330px !important //overriding VK styles
+  iframe:not(:last-child)
+    display:none
+
+.preload-container
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%);
+  color: rgba(255, 255, 255, .87);
+  font-weight: 100;
+  -webkit-font-smoothing: antialiased;
+  width: 400px

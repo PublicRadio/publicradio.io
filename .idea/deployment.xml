@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData" serverName="flops">
+  <component name="PublishConfigData" serverName="flops-dev">
     <serverData>
       <paths name="flops">
         <serverdata>
@@ -9,7 +9,13 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="flops-dev">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/publicradio-dev" local="$PROJECT_DIR$/build" web="/publicradio-dev" />
+          </mappings>
+        </serverdata>
+      </paths>
     </serverData>
   </component>
 </project>
-

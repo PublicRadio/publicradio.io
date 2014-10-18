@@ -16,20 +16,22 @@ var Play = new Player({
     transformSrc(track) {return track.url}
 });
 module.exports = StationEngine;
-
+var currentEngine;
 function Seeker(generator) {
-    var history = [],
-        cursor = -1;
+    getAt.history = [];
+    getAt.cursor = -1;
+
+    return getAt;
 
     function getAbsolute(index) {
-        while (history.length <= index)
-            history.push(generator(history));
-        history = history.filter(el => el instanceof Object);
-        cursor = history.length - 1;
-        return history[index];
+        while (getAt.history.length <= index)
+            getAt.history.push(generator(getAt.history));
+        getAt.history = getAt.history.filter(el => el instanceof Object);
+        getAt.cursor = getAt.history.length - 1;
+        return getAt.history[index];
     }
 
-    return function get(index) { return getAbsolute(cursor + index || 0); };
+    function getAt(index) { return getAbsolute(getAt.cursor + index || 0); }
 }
 
 function getRandom(arr) { return arr[(arr.length * Math.random()) >> 0]; } // jshint ignore:line
@@ -78,17 +80,20 @@ StationEngine.prototype = {
     },
     enable() {
         if (this._enabled) return;
+        if (currentEngine && currentEngine !== this) currentEngine.enabled = false;
+        currentEngine = this;
         clearTimeout(this._disableTimeout);
         this._volumeTween.stop()
             .to({volume: 1}, 500)
             .onComplete(() => {})
             .start();
         if (this.currentTrack) {
-            this._audio.currentTime = (Date.now() - this.currentTrack.startTime) / 1000;
+            if (this.currentTrack.startTime)
+                this._audio.currentTime = (Date.now() - this.currentTrack.startTime) / 1000;
             this._audio.play();
         } else {
             if (this.next() !== false)
-                this._audio.currentTime = this.currentTrack.duration * (0.1 + 0.3 * Math.random()); //guaranteed position from 10% through 40% of track
+                this._audio.currentTime = this.currentTrack.duration * (0.05 + 0.20 * Math.random()); //guaranteed position from 5% through 25% of track
         }
         this._enabled = true;
     },

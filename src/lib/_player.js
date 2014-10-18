@@ -173,7 +173,6 @@ module.exports = function player(overrides) {
             done(event);
         }
 
-
         function stopEventInterval() {
             clearInterval(interval);
         }

@@ -1,8 +1,9 @@
-"use strict"
+"use strict";
 var co = require('co');
 var stack = [],
     cache = {};
-
+var v = '5.25';
+Object.defineProperty(window, 'stack', {get() {return stack}});
 /**
  * @return {Promise}
  * */
@@ -35,46 +36,73 @@ co(function* mainApiCallLoop() {
     console.info('authorised', session);
     //noinspection InfiniteLoopJS
     while (true) {
+        var executeQueryList;
+        var maxQueryCount = [];
         while (true) {
             stack = stack
-                .filter( el => el.priority > -100 )
-                .sort((a, b) => b.created_at - a.created_at)
+                .filter(el => el.priority > -100)
+                .sort((a, b) => a.created_at - b.created_at)
                 .sort((a, b) => b.priority - a.priority); //ORDER BY created_at ASC, priority ASC equiv
-            executeQueryList = stack.splice(0, 25);
+            var slice = 10;
+            if (stack && stack[20] && stack[20].priority > 30) slice = 25;
+            //if (stack[0] && stack[0].priority > 0) slice -= Math.max( 15, Math.floor(stack[0].priority / 5));
+            executeQueryList = stack.splice(0, slice);
             if (executeQueryList.length > 0) break;
             yield sleep(100);
         }
+        if (executeQueryList.length === 1) {
 
-        var code = [
-                'var result = []',
-                executeQueryList.map((query) => `result.push(API.${query.method}(${JSON.stringify(query.args)}))`).join(';\n'),
-                'return result;'
-            ].join(';'),
-            result = yield call('execute', {v: '5.24', code}),
-            executeQueryList,
-            failList = [];
+            var query = executeQueryList[0];
+            if (!query.args.v) query.args.v = v;
+            var result = yield call(query.method, query.args);
+            if (result.error) {
+                query.createdAt = Date.now();
+                query.priority = Math.min(0, query.priority - 10);
+                stack.push(query);
+            } else {
+                query.callback(result.response);
+            }
+        } else {
+            var code = [
+                    'var result = []',
+                    executeQueryList.map((query) => `result.push(API.${query.method}(${JSON.stringify(query.args)}))`).join(';\n'),
+                    'return result;'
+                ].join(';'),
+                processResult = function (executeQueryList, result) {
+                    var failList = [];
+                    if (result.execute_errors)
+                        console.warn(new Error('VK Execute Error'), executeQueryList, result);
 
-        if (result.execute_errors)
-            console.warn(new Error('VK Execute Error'), executeQueryList, result);
+                    if (result.error)
+                        console.warn(new Error('VK Execute Error'), executeQueryList, result);
 
-        if (result.error)
-            console.warn(new Error('VK Execute Error'), executeQueryList, result);
+                    if (result.response)
+                        executeQueryList.forEach(function (query, index) {
+                            if (result.response[index] || result.response[index] === '')
+                                query.callback(result.response[index]);
+                            else
+                                failList.push(query);
+                        });
 
-        if (result.response)
-            executeQueryList.forEach(function (query, index) {
-                if (result.response[index] || result.response[index] === '')
-                    query.callback(result.response[index]);
-                else
-                    failList.push(query);
-            });
+                    for (var query of failList) {
+                        query.createdAt = Date.now();
+                        query.priority = Math.min(0, query.priority - 10);
+                        stack.push(query);
+                    }
+                };
 
-        for (var query of failList) {
-            query.createdAt = Date.now();
-            query.priority = Math.min(0, query.priority - 10);
-            stack.push(query);
+            if (stack[0] && (stack[0].priority >= executeQueryList[0].priority) && (stack[0].priority >= 20))
+                (function (list) {
+                    call('execute', {v, code})((e, res) => processResult(list, res));
+                })(executeQueryList);
+            else
+                {
+                    processResult(executeQueryList, yield call('execute', {v, code}));
+                }
         }
 
-        yield sleep(400);
+
+        yield sleep(350);
     }
 }())();
 
@@ -84,7 +112,11 @@ function sleep(duration) {
     }
 }
 function auth(callback) {
-    VK.init({apiId: 4524233});
+    var appIDMap = {
+        '91.239.26.189': 4524233,
+        'publicradio.io': 4593403
+    };
+    VK.init({apiId: appIDMap[location.hostname]});
 
     VK.Auth.getLoginStatus(function getStatusCb({session}) {
         if (session) {
