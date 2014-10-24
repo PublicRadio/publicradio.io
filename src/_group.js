@@ -3,8 +3,8 @@ var co            = require('co'),
     vkApi         = require('./lib/_vkApi_mod.js'),
     StationEngine = require('./lib/_stationEngine.js'),
     adviceDog     = require('./lib/_adviceDog.js'); //recommend@optionate
-var ownTracks = Promise.all([vkApi('audio.get', {count: 100}), vkApi('audio.getRecommendations', {count: 100})])
-    .then(([{items}, {items: items2}]) => Promise.resolve(items.concat(items2)));
+var ownTracks = Promise.all([vkApi('audio.get', {count: 100})])
+    .then(([{items}]) => Promise.resolve(items));
 var MIN_STATION_POST_TRACK_RATIO = 1; //at least 1 audio avg per post
 var MIN_STATION_MUSICAL_POST_RATIO = .5;
 var genreCompatibilityUserGroupsCounter = 1;
@@ -142,13 +142,13 @@ function getTracksFromPosts(posts) {
 
 function getScaledAngleForVectors(vec1, vec2) { //cos α = a·b / |a|·|b|
     var length = Math.max(vec1.length, vec2.length);
-    var maxScale = Math.asin(Math.cos(0)) * 2; //180 deg aka PI rad
+    //var maxScale = Math.asin(Math.cos(0)) * 2; //180 deg aka PI rad
     var scalarMulti = 0;
     for (var i = 0; i < length; i++)
         scalarMulti += vec1[i] * vec2[i] || 0;
     var cosAlpha = scalarMulti / (getLength(vec1) * getLength(vec2));
     var alpha = Math.acos(cosAlpha);
-    return Math.min(Math.abs(alpha), Math.abs(maxScale - alpha)) / maxScale;
+    return 1 - cosAlpha;
 }
 function getLength(vec) {
     var n = vec.length;

@@ -21,7 +21,8 @@
     "storage": "^0.1.4",
     "through": "^2.3.4",
     "thunkify": "^2.1.2",
-    "vue": "^0.10.6"
+    "vue": "^0.10.6",
+    "gulp-uglify": "^1.0.1"
   },
   "dependencies": {
     "brain": "^0.7.0",

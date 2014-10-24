@@ -44,7 +44,7 @@ function StationEngine(trackList, onTrackChange) {
     this._enabled = false;
     this._volumeTween = new TWEEN.Tween({volume: 0})
         .easing(TWEEN.Easing.Quintic.InOut)
-        .onUpdate(function () { if (self._audio) self._audio.volume = this.volume; });
+        .onUpdate(function () { if (self._audio) self._audio.volume = this.volume * window.globalVolumeLevel; });
 
 
     var probability = function (track, history) {
@@ -74,7 +74,7 @@ StationEngine.prototype = {
         var nextTrack = this.nextTrack();
         if (!nextTrack) return false;
         this.currentTrack = nextTrack;
-        this._audio = new Play(this.currentTrack, {}, this.next.bind(this));
+        this._audio = new Play(this.currentTrack, {volume: this._audio ? this._audio.volume : window.globalVolumeLevel}, this.next.bind(this));
         this.onTrackChange(nextTrack);
 
     },

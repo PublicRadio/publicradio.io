@@ -101,20 +101,28 @@ var vm = new Vue({
         currentStation   : null,
         currentTrack     : null,
         currentProgress  : 0,
-        anchor           : ''
+        anchor           : '',
+        volume           : 100, mute: false,
+        likedTracks      : []
     },
     methods : {
         likeCurrentTrack() {
             var self = this;
             var track = this.currentTrack;
+            self.likedTracks.push(track);
             co((function*() {
+                var session = yield vkApi.session;
                 track.added = true;
+                window.ga('send', 'event', 'social', 'like', 'track', {
+                    group_id: self.currentStation.id,
+                    artist: track.artist,
+                    genre: track.genre_id,
+                    genre_compatibility: self.currentStation.genreCompatibility
+                });
                 if (!self.currentStation.is_member)
                     self.currentStation.genreCompatibility = Math.max(1, self.currentStation.genreCompatibility + .05);
 
-                var session = yield vkApi.session;
                 yield self.userAlbumsPromise;
-                if (track !== self.currentTrack) return;
                 var currentAlbum;
                 var title = 'publicRadio.io // ' + self.currentStation.name + ' (' + self.currentStation.screen_name + ')';
                 if (currentAlbum = self.userAlbums.filter(({title}) =>
@@ -122,17 +130,17 @@ var vm = new Vue({
                         title.endsWith('(' + self.currentStation.screen_name + ')')
                     )[0]) {
                     currentAlbum.title = title;
-                    yield vkApi('audio.editAlbum', currentAlbum, 100);
+                    currentAlbum.album_id = currentAlbum.album_id || currentAlbum.id;
+                        yield vkApi('audio.editAlbum', currentAlbum, 100);
                 } else {
                     var {album_id} = yield vkApi('audio.addAlbum', {title}, 100);
-                    self.userAlbums.push(currentAlbum = {album_id, title});
+                    self.userAlbums.push(currentAlbum = {album_id: album_id, title});
                 }
-                if (track !== self.currentTrack) return;
                 var aid = yield vkApi('audio.add', {audio_id: track.id, owner_id: track.owner_id}, 100);
-                yield [
+                var data = yield [
                     vkApi('audio.moveToAlbum', {album_id: currentAlbum.album_id, audio_ids: aid}, 100),
                     vkApi('audio.edit', {
-                        owner_id: session.mid,
+                        owner_id: currentAlbum.owner_id || session.mid,
                         audio_id: aid,
                         title   : self.currentTrack.title + ' (найдено на PublicRadio.io)'
                     }, 100)
@@ -141,6 +149,14 @@ var vm = new Vue({
         },
         setGroupAsBad(groupId) {
             badGroups.add(groupId);
+        },
+        doMute(){
+            if (this.volume == 0) {
+                this.volume = this._volume != 0 ? this._volume : 100;
+            } else {
+                this._volume = this.volume;
+                this.volume = 0;
+            }
         }
     },
     created() {
@@ -150,7 +166,24 @@ var vm = new Vue({
         });
     },
     ready() {
-        var self = this;
+        var self = this,
+            updateVolume = function(){
+                window.globalVolumeLevel = Number(self.volume) * 0.01;
+                localStorage.globalVolumeLevel = self.volume;
+                if (self.currentStation && self.currentStation._engine && self.currentStation._engine._audio) self.currentStation._engine._audio.volume = window.globalVolumeLevel;
+            };
+        this.$watch('volume', updateVolume);
+        this.$watch('mute', updateVolume);
+        /*window.addEventListener('keyup', function(event){
+            if (!self.currentStation.id) return;
+            if (event.which !== 32) return; //spacebar
+            self.mute = !self.mute;
+            event.stopImmediatePropagation();
+            event.preventDefault();
+        });*/
+        if (localStorage.globalVolumeLevel && localStorage.globalVolumeLevel != 0) self.volume = localStorage.globalVolumeLevel;
+        updateVolume();
+
         window.addEventListener("hashchange", function () {
             self.anchor = document.location.hash.replace('#', '');
         }, false);
@@ -161,9 +194,17 @@ var vm = new Vue({
         });
         VK.Observer.subscribe("widgets.subscribed", function f() {
             self.currentStation.is_member = true;
+            window.ga('send', 'event', 'social', 'like', 'group', {
+                group_id: self.currentStation.id,
+                genre_compatibility: self.currentStation.genreCompatibility
+            });
         });
         VK.Observer.subscribe("widgets.unsubscribed", function f() {
             self.currentStation.is_member = false;
+            window.ga('send', 'event', 'social', 'dislike', 'group', {
+                group_id: self.currentStation.id,
+                genre_compatibility: self.currentStation.genreCompatibility
+            });
         });
 
         var group;
@@ -214,7 +255,7 @@ var vm = new Vue({
 });
 var o = {};
 Object.defineProperty(window, '$s', {value: o});
-window['v'+'m'] = function(k){if (k === o) return this;}.bind(vm);
+window['v' + 'm'] = function (k) {if (k === o) return this;}.bind(vm);
 
 function getPopularGroups() {
     return vkApi('groups.search', {

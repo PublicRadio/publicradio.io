@@ -32,6 +32,7 @@ co(function* mainApiCallLoop() {
     while (window.VK === undefined)
         yield sleep(100);
     var session = yield auth;
+    window.ga('set', '&uid', session.mid);
     resolveSessionFn(session);
     console.info('authorised', session);
     //noinspection InfiniteLoopJS
@@ -91,14 +92,14 @@ co(function* mainApiCallLoop() {
                     }
                 };
 
-            if (stack[0] && (stack[0].priority >= executeQueryList[0].priority) && (stack[0].priority >= 20))
+            //if (stack[0] && (stack[0].priority - executeQueryList[0].priority > 10) && (stack[0].priority >= 50))
                 (function (list) {
                     call('execute', {v, code})((e, res) => processResult(list, res));
                 })(executeQueryList);
-            else
-                {
-                    processResult(executeQueryList, yield call('execute', {v, code}));
-                }
+            //else
+            //    {
+            //        processResult(executeQueryList, yield call('execute', {v, code}));
+            //    }
         }
 
 
@@ -114,7 +115,7 @@ function sleep(duration) {
 function auth(callback) {
     var appIDMap = {
         '91.239.26.189': 4524233,
-        'publicradio.io': 4593403
+        'publicradio.io': 4597732
     };
     VK.init({apiId: appIDMap[location.hostname]});
 

@@ -1,9 +1,10 @@
 .popups
     .popup(v-if='anchor === "needAuth"')
-        p Public radio - это экспериментальный музыкальный проект.
+        p Public Radio - это экспериментальный музыкальный проект.
         p Он превращает музыкальные группы и паблики из Вконтакте в музыкальные радиостанции, отсортированные по вашим музыкальным вкусам.
+        p Все воспроизводимые композиции взяты из соответствующих групп Вконтакте, Public Radio лишь воспроизводит их в порядке, создающем ощущение почти настоящего радио.
         p Он подбирает подходящие станции как из ваших, так и из специально отобранных для этой цели групп.
-        p Publuc radio - некоммерческий проект. Он создан исключительно для того, чтобы получать еще больше удовольствия от новой музыки.
+        p Public Radio - некоммерческий проект. Он создан исключительно для того, чтобы получать еще больше удовольствия от новой музыки.
         p Обратите внимание: для нормальной работы Public Radio необходимо высокоскоростное подключение к сети.
         a(onclick='VK.Auth.login(function(){}, 10)').popup-button.is-vk Войти через ВК
 header.header
@@ -17,10 +18,11 @@ header.header
         a(href="https://vk.com/public.radio", target="_blank") Public Radio
     .like(v-show='currentStation.id', v-class='icon-like:!currentStation.is_member, icon-dislike: currentStation.is_member', data-tooltip="{{currentStation.is_member ? 'Отменить подписку' : 'Подписаться'}}")
         #subscribeToGroup(style='opacity: 0; -webkit-transform: scale(2);-moz-transform: scale(2);transform: scale(2);width: 2em;height: 2em;margin: 12px 0 0 0px;')
-    .volume(v-class='icon-volume-mute: volume === 0, icon-volume: volume !== 0')
+    .volume(v-class='icon-volume-mute: volume == 0, icon-volume: volume != 0', v-if='currentStation.id')
         //v-show='currentStation.id',
+        div(style="width:100%;height:100%;cursor:pointer;position:relative;z-index:100",v-on="click: doMute")
         .overlay
-            input(type='range', v-model='volume', value=0)
+            input(type='range', v-model='volume', max=100)
     .stationArt(v-style="background-image: 'url('+ currentStation.avatar + ')'", v-tooltip-current-station)
 
 main

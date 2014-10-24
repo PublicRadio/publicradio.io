@@ -19,6 +19,7 @@ gulp.task('build-js', function () {
                 debug    : true
             }
         )).on("error", log)
+        //.pipe(plugins.uglify({})).on("error", log)
         .pipe(gulp.dest("build"));
 });
 
@@ -44,5 +45,5 @@ function log(error) {
         "----------ERROR MESSAGE END----------".bold.red.underline,
         ''
     ].join('\n'));
-    this.end()
+    this.end();
 }
