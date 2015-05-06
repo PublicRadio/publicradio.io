@@ -1,7 +1,0 @@
-a.station(v-style="background-image: 'url('+ avatar + ')'",
-data-name='{{screen_name}}',
-v-on="click: setAsCurrent",
-v-class="current: id === currentStation.id, noAnimation: shown")
-    .station-action-play(v-if='id !== currentStation.id')
-    .station-info.is-has-only-child
-        .station-info-line {{name}}
