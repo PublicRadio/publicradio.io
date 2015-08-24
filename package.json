@@ -47,6 +47,7 @@
     "run-sequence": "^1.1.1",
     "style-loader": "^0.12.3",
     "template-html-loader": "0.0.3",
+    "uglify-loader": "^1.2.0",
     "webpack": "^1.10.1",
     "webpack-dev-server": "^1.10.1"
   },
