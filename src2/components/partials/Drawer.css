@@ -1,0 +1,25 @@
+.userView {
+    padding: 0 40px 0 32px !important;
+}
+
+.userInfo {
+    background-color: transparent !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.userImage {
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    padding: 30px;
+    border-radius: 50%;
+    width: 0;
+    height: 0;
+    display: inline-block;
+    margin-right: 16px;
+}
+
+.exitButton {
+    display: block;
+}

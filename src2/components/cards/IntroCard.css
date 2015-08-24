@@ -1,0 +1,17 @@
+.logoBackgroundContainer {
+    position: relative;
+}
+
+.logoBackground {
+    z-index: -1;
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+    width: 100%;
+    background: url('https://pp.vk.me/c618828/v618828207/1bbe3/Bjb8PRD0pJE.jpg') no-repeat left center;
+    background-size: contain;
+    opacity: 0.3;
+    transform: scaleX(-1);
+}

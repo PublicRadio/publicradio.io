@@ -1,0 +1,12 @@
+
+.buttons {
+    position: absolute;
+    right: 0;
+    bottom: 100%;
+    top: 0;
+}
+
+.button {
+    margin-top: -28px;
+    margin-right: 16px;
+}
