@@ -31,7 +31,9 @@ export const plugins = [
         '__DEV__'             : DEBUG
     }),
     ...(DEBUG
-        ? []
+        ? [
+        new webpack.HotModuleReplacementPlugin()
+    ]
         : [
         new webpack.optimize.DedupePlugin(),
         new webpack.optimize.UglifyJsPlugin(),
