@@ -6,7 +6,7 @@ import jade from 'jade';
 import packageJson from '../package.json';
 
 const DEBUG = !Boolean(process.env.PRODUCTION);
-
+const project_dir = './src';
 export const cache = DEBUG;
 export const debug = DEBUG;
 
@@ -15,8 +15,8 @@ export const stats = {
     reasons: DEBUG
 };
 
-const indexHtmlTemplate = jade.compileFile(resolvePath('./src/index.jade'), {
-    pretty      : DEBUG,
+const indexHtmlTemplate = jade.compileFile(resolvePath(`${project_dir}/index.jade`), {
+    pretty: DEBUG,
 });
 
 export const plugins = [
@@ -41,7 +41,8 @@ export const plugins = [
     ])
 ];
 export const resolve = {
-    extensions: ['', '.js', '.jsx']
+    extensions: ['', '.js', '.jsx'],
+    alias     : {'~': resolvePath(project_dir)}
 };
 
 const STYLE_LOADER =
@@ -64,24 +65,23 @@ export const module = {
 };
 
 export const postcss = [
-    ['autoprefixer-core', DEBUG
-        ? ['Chrome >= 20']
-        : [
-        'Android 2.3',
-        'Android >= 4',
-        'Chrome >= 20',
-        'Firefox >= 24',
-        'Explorer >= 10',
-        'iOS >= 6',
-        'Opera >= 12',
-        'Safari >= 6'
-    ]],
-    ['rucksack-css'],
-    ['cssnext'],
+    ['autoprefixer-core',
+     DEBUG
+         ? ['Chrome >= 20']
+         : [
+         'Android 2.3',
+         'Android >= 4',
+         'Chrome >= 20',
+         'Firefox >= 24',
+         'Explorer >= 10',
+         'iOS >= 6',
+         'Opera >= 12',
+         'Safari >= 6'
+     ]],
     ['postcss-modules-local-by-default', {}]
 ].map(([module, options]) => require(module)(options));
 
-export let entry = DEBUG ? ['webpack/hot/dev-server', './src/index.js'] : ['./src/index.js'];
+export let entry = DEBUG ? ['webpack/hot/dev-server', `${project_dir}/index.js`] : [`${project_dir}/index.js`];
 
 export const output = {
     publicPath   : '/',

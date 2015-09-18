@@ -1,109 +1,109 @@
 (function(w) {
-if (w.fastXDM) return;
+if (w.fastXDM) return
 
-var handlers = {};
-var onEnvLoad = [];
-var env = {};
+var handlers = {}
+var onEnvLoad = []
+var env = {}
 
 // Key generation
 function genKey() {
-  var key = '';
-  for (i=0;i<5;i++) key += Math.ceil(Math.random()*15).toString(16);
-  return key;
+  var key = ''
+  for (i=0;i<5;i++) key += Math.ceil(Math.random()*15).toString(16)
+  return key
 }
 function waitFor(obj, prop, func, self,  count) {
   if (obj[prop]) {
-     func.apply(self);
+     func.apply(self)
   } else {
-    count = count || 0;
+    count = count || 0
     if (count < 1000) setTimeout(function() {
       waitFor(obj, prop, func, self, count + 1)
-    }, 0);
+    }, 0)
   }
 }
 function attachScript(url) {
   setTimeout(function() {
-    var newScript = document.createElement('script');
-    newScript.type = 'text/javascript';
-    newScript.src = url || w.fastXDM.helperUrl;
+    var newScript = document.createElement('script')
+    newScript.type = 'text/javascript'
+    newScript.src = url || w.fastXDM.helperUrl
     waitFor(document, 'body', function() {
-      document.getElementsByTagName('HEAD')[0].appendChild(newScript);
-    });
-  }, 0);
+      document.getElementsByTagName('HEAD')[0].appendChild(newScript)
+    })
+  }, 0)
 }
 
 function walkVar(value, clean) {
   switch (typeof value) {
     case 'string':
       if (clean) {
-        return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;')
       }
-      return value.replace(/&#039;/g, '\'').replace(/&quot;/g, '"').replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&amp;/g, '&');
+      return value.replace(/&#039;/g, '\'').replace(/&quot;/g, '"').replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&amp;/g, '&')
 
     case 'object':
       if (Object.prototype.toString.apply(value) === '[object Array]') {
-        newValue = [];
+        newValue = []
         for (var i = 0; i < value.length; i++) {
-          newValue[i] = walkVar(value[i], clean);
+          newValue[i] = walkVar(value[i], clean)
         }
       } else {
         for (var k in value) {
-          newValue = {};
+          newValue = {}
           if (Object.hasOwnProperty.call(value, k)) {
-            newValue[k] = walkVar(value[k], clean);
+            newValue[k] = walkVar(value[k], clean)
           }
         }
       }
     default:
-      newValue = value;
+      newValue = value
   }
 
-  return newValue;
+  return newValue
 }
 
 // Env functions
 function getEnv(callback, self) {
   if (env.loaded) {
-    callback.apply(self, [env]);
+    callback.apply(self, [env])
   } else {
-    onEnvLoad.push([self, callback]);
+    onEnvLoad.push([self, callback])
   }
 }
 
 function envLoaded() {
-  env.loaded = true;
-  var i = onEnvLoad.length;
+  env.loaded = true
+  var i = onEnvLoad.length
   while (i--) {
-    onEnvLoad[i][1].apply(onEnvLoad[i][0], [env]);
+    onEnvLoad[i][1].apply(onEnvLoad[i][0], [env])
   }
 }
 
 function applyMethod(strData, self) {
   getEnv(function(env) {
-    var data = env.json.parse(strData);
+    var data = env.json.parse(strData)
     if (data[0]) {
-      if (!data[1]) data[1] = [];
-      var i = data[1].length;
+      if (!data[1]) data[1] = []
+      var i = data[1].length
       while (i--) {
         if (data[1][i]._func) {
-          var funcNum = data[1][i]._func;
+          var funcNum = data[1][i]._func
           data[1][i] = function() {
-            var args = Array.prototype.slice.call(arguments);
-            args.unshift('_func'+funcNum);
-            self.callMethod.apply(self, args);
+            var args = Array.prototype.slice.call(arguments)
+            args.unshift('_func'+funcNum)
+            self.callMethod.apply(self, args)
           }
         } else if (self.options.safe) {
-          data[1][i] = walkVar(data[1][i], true);
+          data[1][i] = walkVar(data[1][i], true)
         }
       }
       setTimeout(function() {
         if (!self.methods[data[0]]) {
-          throw Error('fastXDM: Method ' + data[0] + ' is undefined');
+          throw Error('fastXDM: Method ' + data[0] + ' is undefined')
         }
-        self.methods[data[0]].apply(self, data[1]);
-      }, 0);
+        self.methods[data[0]].apply(self, data[1])
+      }, 0)
     }
-  });
+  })
 }
 
 // XDM object
@@ -112,96 +112,96 @@ w.fastXDM = {
   helperUrl: ((location.protocol === 'https:') ? 'https:' : 'http:') + '//vk.com/js/api/xdmHelper.js',
 
   Server: function(methods, filter, options) {
-    this.methods = methods || {};
-    this.id = w.fastXDM._id++;
-    this.options = options || {};
-    this.filter = filter;
-    this.key = genKey();
+    this.methods = methods || {}
+    this.id = w.fastXDM._id++
+    this.options = options || {}
+    this.filter = filter
+    this.key = genKey()
     this.methods['%init%'] = this.methods.__fxdm_i = function() {
-      w.fastXDM.run(this.id);
-      if (this.methods.onInit) this.methods.onInit();
-    };
-    this.frameName = 'fXD'+this.key;
-    this.server = true;
-    handlers[this.key] = [applyMethod, this];
+      w.fastXDM.run(this.id)
+      if (this.methods.onInit) this.methods.onInit()
+    }
+    this.frameName = 'fXD'+this.key
+    this.server = true
+    handlers[this.key] = [applyMethod, this]
   },
 
   Client: function(methods, options) {
-    this.methods = methods || {};
-    this.id = w.fastXDM._id++;
-    this.options = options || {};
-    w.fastXDM.run(this.id);
+    this.methods = methods || {}
+    this.id = w.fastXDM._id++
+    this.options = options || {}
+    w.fastXDM.run(this.id)
     if (window.name.indexOf('fXD') === 0) {
-      this.key = window.name.substr(3);
+      this.key = window.name.substr(3)
     } else {
-      throw Error('Wrong window.name property.');
+      throw Error('Wrong window.name property.')
     }
-    this.caller = window.parent;
-    handlers[this.key] = [applyMethod, this];
-    this.client = true;
+    this.caller = window.parent
+    handlers[this.key] = [applyMethod, this]
+    this.client = true
 
     w.fastXDM.on('helper', function() {
-      w.fastXDM.onClientStart(this);
-    }, this);
+      w.fastXDM.onClientStart(this)
+    }, this)
 
     getEnv(function(env) {
-      env.send(this, env.json.stringify(['%init%']));
-      var methods = this.methods;
+      env.send(this, env.json.stringify(['%init%']))
+      var methods = this.methods
       setTimeout(function() {
-        if (methods.onInit) methods.onInit();
-      }, 0);
-    }, this);
+        if (methods.onInit) methods.onInit()
+      }, 0)
+    }, this)
   },
 
   onMessage: function(e) {
-    if (!e.data) return false;
-    var data = e.data;
-    if (typeof data != 'string' && !(data instanceof String)) return false;
-    var key = data.substr(0, 5);
+    if (!e.data) return false
+    var data = e.data
+    if (typeof data != 'string' && !(data instanceof String)) return false
+    var key = data.substr(0, 5)
     if (handlers[key]) {
-      var self = handlers[key][1];
+      var self = handlers[key][1]
       if (self && (!self.filter || self.filter(e.origin))) {
-        handlers[key][0](e.data.substr(6), self);
+        handlers[key][0](e.data.substr(6), self)
       }
     }
   },
 
   setJSON: function(json) {
-    env.json = json;
+    env.json = json
   },
 
   getJSON: function(callback) {
-    if (!callback) return env.json;
+    if (!callback) return env.json
     getEnv(function(env) {
-      callback(env.json);
-    });
+      callback(env.json)
+    })
   },
 
   setEnv: function(exEnv) {
-    var i;
+    var i
     for (i in exEnv) {
-      env[i] = exEnv[i];
+      env[i] = exEnv[i]
     }
-    envLoaded();
+    envLoaded()
   },
 
   _q: {},
 
   on: function(key, act, self) {
-    if (!this._q[key]) this._q[key] = [];
+    if (!this._q[key]) this._q[key] = []
     if (this._q[key] == -1) {
-      act.apply(self);
+      act.apply(self)
     } else {
-      this._q[key].push([act, self]);
+      this._q[key].push([act, self])
     }
   },
 
   run: function(key) {
-    var len = (this._q[key] || []).length;
+    var len = (this._q[key] || []).length
     if (this._q[key] && len > 0) {
-      for (var i = 0; i < len; i++) this._q[key][i][0].apply(this._q[key][i][1]);
+      for (var i = 0; i < len; i++) this._q[key][i][0].apply(this._q[key][i][1])
     }
-    this._q[key] = -1;
+    this._q[key] = -1
   },
 
   waitFor: waitFor
@@ -209,24 +209,24 @@ w.fastXDM = {
 
 w.fastXDM.Server.prototype.start = function(obj, count) {
   if (obj.contentWindow) {
-    this.caller = obj.contentWindow;
-    this.frame = obj;
+    this.caller = obj.contentWindow
+    this.frame = obj
 
     w.fastXDM.on('helper', function() {
-      w.fastXDM.onServerStart(this);
-    }, this);
+      w.fastXDM.onServerStart(this)
+    }, this)
 
   } else { // Opera old versions
-    var self = this;
-    count = count || 0;
+    var self = this
+    count = count || 0
     if (count < 50) setTimeout(function() {
-      self.start.apply(self, [obj, count+1]);
-    }, 100);
+      self.start.apply(self, [obj, count+1])
+    }, 100)
   }
 }
 
 w.fastXDM.Server.prototype.destroy = function() {
-  handlers.splice(handlers.indexOf(this.key), 1);
+  handlers.splice(handlers.indexOf(this.key), 1)
 }
 
 function extend(obj1, obj2){
@@ -234,84 +234,84 @@ function extend(obj1, obj2){
     if (obj1[i] && typeof(obj1[i]) == 'object') {
       extend(obj1[i], obj2[i])
     } else {
-      obj1[i] = obj2[i];
+      obj1[i] = obj2[i]
     }
   }
 }
 
 w.fastXDM.Server.prototype.append = function(obj, options) {
-  var div = document.createElement('DIV');
-  div.innerHTML = '<iframe name="'+this.frameName+'" ></iframe>';
-  var frame = div.firstChild;
-  var self = this;
+  var div = document.createElement('DIV')
+  div.innerHTML = '<iframe name="'+this.frameName+'" ></iframe>'
+  var frame = div.firstChild
+  var self = this
   setTimeout(function() {
-    frame.frameBorder = '0';
-    if (options) extend(frame, options);
-    obj.insertBefore(frame, obj.firstChild);
-    self.start(frame);
-  }, 0);
-  return frame;
+    frame.frameBorder = '0'
+    if (options) extend(frame, options)
+    obj.insertBefore(frame, obj.firstChild)
+    self.start(frame)
+  }, 0)
+  return frame
 }
 
 w.fastXDM.Client.prototype.callMethod = w.fastXDM.Server.prototype.callMethod = function() {
-  var args = Array.prototype.slice.call(arguments);
-  var method = args.shift();
-  var i = args.length;
+  var args = Array.prototype.slice.call(arguments)
+  var method = args.shift()
+  var i = args.length
   while (i--) {
     if (typeof(args[i]) == 'function') {
-      this.funcsCount = (this.funcsCount || 0) + 1;
-      var func = args[i];
-      var funcName = '_func' + this.funcsCount;
+      this.funcsCount = (this.funcsCount || 0) + 1
+      var func = args[i]
+      var funcName = '_func' + this.funcsCount
       this.methods[funcName] = function() {
-        func.apply(this, arguments);
-        delete this.methods[funcName];
+        func.apply(this, arguments)
+        delete this.methods[funcName]
       }
-      args[i] = {_func: this.funcsCount};
+      args[i] = {_func: this.funcsCount}
     } else if (this.options.safe) {
-      args[i] = walkVar(args[i], false);
+      args[i] = walkVar(args[i], false)
     }
   }
   waitFor(this, 'caller', function() {
     w.fastXDM.on(this.id, function() {
       getEnv(function(env) {
-        env.send(this, env.json.stringify([method, args]));
-      }, this);
-    }, this);
-  }, this);
+        env.send(this, env.json.stringify([method, args]))
+      }, this)
+    }, this)
+  }, this)
 }
 
 if (w.JSON && typeof(w.JSON) == 'object' && w.JSON.parse && w.JSON.stringify && w.JSON.stringify({a:[1,2,3]}).replace(/ /g, '') == '{"a":[1,2,3]}') {
-  env.json = {parse: w.JSON.parse, stringify: w.JSON.stringify};
+  env.json = {parse: w.JSON.parse, stringify: w.JSON.stringify}
 } else {
-  w.fastXDM._needJSON = true;
+  w.fastXDM._needJSON = true
 }
 
 // PostMessage cover
 if (w.postMessage) {
-  env.protocol = 'p';
+  env.protocol = 'p'
   env.send = function(xdm, strData) {
-    var win = (xdm.frame ? xdm.frame.contentWindow : xdm.caller);
-    win.postMessage(xdm.key+':'+strData, "*");
+    var win = (xdm.frame ? xdm.frame.contentWindow : xdm.caller)
+    win.postMessage(xdm.key+':'+strData, "*")
   }
   if (w.addEventListener) {
-    w.addEventListener("message", w.fastXDM.onMessage, false);
+    w.addEventListener("message", w.fastXDM.onMessage, false)
   } else {
-    w.attachEvent("onmessage", w.fastXDM.onMessage);
+    w.attachEvent("onmessage", w.fastXDM.onMessage)
   }
 
   if (w.fastXDM._needJSON) {
-    w.fastXDM._onlyJSON = true;
-    attachScript();
+    w.fastXDM._onlyJSON = true
+    attachScript()
   } else {
-    envLoaded();
+    envLoaded()
   }
 } else {
-  attachScript();
+  attachScript()
 }
-})(window);
+})(window)
 
 
-if (!window.VK) window.VK = {};
+if (!window.VK) window.VK = {}
 
 
 /*
@@ -330,14 +330,14 @@ if(!VK.MD5){VK.MD5=function(n){var j=function(o,r){var q=(o&65535)+(r&65535),p=(
 VK.extend = function(target, source, overwrite) {
   for (var key in source) {
     if (overwrite || typeof target[key] === 'undefined') {
-      target[key] = source[key];
+      target[key] = source[key]
     }
   }
-  return target;
-};
+  return target
+}
 
 if (VK._protocol !== 'https:') {
-  VK._protocol = ((location.protocol === 'https:') ? 'https:' : 'http:');
+  VK._protocol = ((location.protocol === 'https:') ? 'https:' : 'http:')
 }
 
 if (!VK.xdConnectionCallbacks) {
@@ -367,39 +367,39 @@ VK.extend(VK, {
     QUESTIONS: 0x40,
     WIKI:      0x80
   }
-});
+})
 
 VK.init = function(options) {
-  var body, root;
+  var body, root
 
-  VK._apiId = null;
+  VK._apiId = null
   if (!options.apiId) {
-    throw Error('VK.init() called without an apiId');
+    throw Error('VK.init() called without an apiId')
   }
-  VK._apiId = options.apiId;
+  VK._apiId = options.apiId
 
-  if (options.onlyWidgets) return true;
+  if (options.onlyWidgets) return true
 
   if (options.nameTransportPath && options.nameTransportPath !== '') {
-    VK._nameTransportPath = options.nameTransportPath;
+    VK._nameTransportPath = options.nameTransportPath
   }
 
-  root = document.getElementById(VK._rootId);
+  root = document.getElementById(VK._rootId)
   if (!root) {
-    root = document.createElement('div');
-    root.id = VK._rootId;
-    body = document.getElementsByTagName('body')[0];
-    body.insertBefore(root, body.childNodes[0]);
+    root = document.createElement('div')
+    root.id = VK._rootId
+    body = document.getElementsByTagName('body')[0]
+    body.insertBefore(root, body.childNodes[0])
   }
-  root.style.position = 'absolute';
-  root.style.top = '-10000px';
+  root.style.position = 'absolute'
+  root.style.top = '-10000px'
 
-  var session = VK.Cookie.load();
+  var session = VK.Cookie.load()
   if (session) {
-    VK.Auth._loadState = 'loaded';
-    VK.Auth.setSession(session, session ? 'connected' : 'unknown');
+    VK.Auth._loadState = 'loaded'
+    VK.Auth.setSession(session, session ? 'connected' : 'unknown')
   }
-};
+}
 
 if (!VK.Cookie) {
 VK.Cookie = {
@@ -407,69 +407,69 @@ VK.Cookie = {
   load: function() {
     var
       cookie = document.cookie.match('\\bvk_app_' + VK._apiId + '=([^;]*)\\b'),
-      session;
+      session
 
     if (cookie) {
-      session = this.decode(cookie[1]);
+      session = this.decode(cookie[1])
       if (session.secret != 'oauth') {
-        return false;
+        return false
       }
-      session.expire = parseInt(session.expire, 10);
-      VK.Cookie._domain = '.' + window.location.hostname;//session.base_domain;
+      session.expire = parseInt(session.expire, 10)
+      VK.Cookie._domain = '.' + window.location.hostname;//session.base_domain
     }
 
-    return session;
+    return session
   },
   setRaw: function(val, ts, domain, time) {
-    var rawCookie;
-    rawCookie = 'vk_app_' + VK._apiId + '=' + val + '';
-    var exp = time ? (new Date().getTime() + time * 1000) : ts * 1000;
-    rawCookie += (val && ts === 0 ? '' : '; expires=' + new Date(exp).toGMTString());
-    rawCookie += '; path=/';
-    rawCookie += (domain ? '; domain=.' + domain : '');
-    document.cookie = rawCookie;
+    var rawCookie
+    rawCookie = 'vk_app_' + VK._apiId + '=' + val + ''
+    var exp = time ? (new Date().getTime() + time * 1000) : ts * 1000
+    rawCookie += (val && ts === 0 ? '' : '; expires=' + new Date(exp).toGMTString())
+    rawCookie += '; path=/'
+    rawCookie += (domain ? '; domain=.' + domain : '')
+    document.cookie = rawCookie
 
-    this._domain = domain;
+    this._domain = domain
   },
   set: function(session, resp) {
     if (session) {
-      this.setRaw(this.encode(session), session.expire, window.location.hostname, (resp || {}).time);
+      this.setRaw(this.encode(session), session.expire, window.location.hostname, (resp || {}).time)
     } else {
-      this.clear();
+      this.clear()
     }
   },
   clear: function() {
-    this.setRaw('', 0, this._domain, 0);
+    this.setRaw('', 0, this._domain, 0)
   },
   encode: function(params) {
     var
       pairs = [],
-      key;
+      key
 
     for (key in params) {
-      if (key != 'user') pairs.push(encodeURIComponent(key) + '=' + encodeURIComponent(params[key]));
+      if (key != 'user') pairs.push(encodeURIComponent(key) + '=' + encodeURIComponent(params[key]))
     }
-    pairs.sort();
+    pairs.sort()
 
-    return pairs.join('&');
+    return pairs.join('&')
   },
   decode: function(str) {
     var
       params = {},
       parts = str.split('&'),
       i,
-      pair;
+      pair
 
     for (i=0; i < parts.length; i++) {
-      pair = parts[i].split('=', 2);
+      pair = parts[i].split('=', 2)
       if (pair && pair[0]) {
-        params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1]);
+        params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1])
       }
     }
 
-    return params;
+    return params
   }
-};
+}
 }
 
 if (!VK.Api) {
@@ -478,134 +478,134 @@ VK.Api = {
   _callbacks: {},
   ie6_7: function() {
     if (!VK.Api.ieTested) {
-      VK.Api.isIE6_7 = navigator.userAgent.match(/MSIE [6|7]/i);
-      VK.Api.ieTested = true;
+      VK.Api.isIE6_7 = navigator.userAgent.match(/MSIE [6|7]/i)
+      VK.Api.ieTested = true
     }
-    return VK.Api.isIE6_7;
+    return VK.Api.isIE6_7
   },
   attachScript: function(url) {
-    if (!VK.Api._headId) VK.Api._headId = document.getElementsByTagName("head")[0];
-    var newScript = document.createElement('script');
-    newScript.type = 'text/javascript';
-    newScript.setAttribute('encoding', 'UTF-8');
-    newScript.src = url;
-    VK.Api._headId.appendChild(newScript);
+    if (!VK.Api._headId) VK.Api._headId = document.getElementsByTagName("head")[0]
+    var newScript = document.createElement('script')
+    newScript.type = 'text/javascript'
+    newScript.setAttribute('encoding', 'UTF-8')
+    newScript.src = url
+    VK.Api._headId.appendChild(newScript)
   },
   checkMethod: function(method, params, cb, queryTry) {
-    var m = method.toLowerCase();
+    var m = method.toLowerCase()
     if (m == 'wall.post' || m == 'activity.set') {
-      var text = (m == 'activity.set') ? params.text : params.message;
+      var text = (m == 'activity.set') ? params.text : params.message
       if (!text) {
-        text = '';
+        text = ''
       }
-      var query =  VK._protocol + '//vk.com/al_apps.php?act=wall_post_box&widget=1&method='+m+'&aid=' + parseInt(VK._apiId, 10) + '&text=' + encodeURIComponent(text);
+      var query =  VK._protocol + '//vk.com/al_apps.php?act=wall_post_box&widget=1&method='+m+'&aid=' + parseInt(VK._apiId, 10) + '&text=' + encodeURIComponent(text)
       if (m == 'wall.post') {
-        query += '&owner_id=' + parseInt(params.owner_id || 0, 10) + '&attachments=' + (params.attachments || params.attachment || '') + '&publish_date=' + (params.publish_date || '');
+        query += '&owner_id=' + parseInt(params.owner_id || 0, 10) + '&attachments=' + (params.attachments || params.attachment || '') + '&publish_date=' + (params.publish_date || '')
       }
-      var method_access = '_'+(Math.random()).toString(16).substr(2);
-      query += '&method_access='+method_access;
+      var method_access = '_'+(Math.random()).toString(16).substr(2)
+      query += '&method_access='+method_access
       var popup = VK.UI.popup({
         url: query,
         width: 460,
         height: 249
-      });
+      })
       var timer = setInterval(function() {
         if (VK.UI.active.closed) {
-          clearInterval(timer);
-          params.method_access = method_access;
-          VK.Api.call(method, params, cb, queryTry);
+          clearInterval(timer)
+          params.method_access = method_access
+          VK.Api.call(method, params, cb, queryTry)
         }
-      }, 500);
-      return false;
+      }, 500)
+      return false
     }
-    return true;
+    return true
   },
   call: function(method, params, cb, queryTry) {
     var
       query = params || {},
       qs,
-      responseCb;
+      responseCb
 
     if (typeof query != 'object' || typeof cb != 'function') {
-      return false;
+      return false
     }
     if (!params.method_access && !params.method_force && !VK.Api.checkMethod(method, params, cb, queryTry)) {
-      return;
+      return
     }
 
-    if (!queryTry) queryTry = 0;
+    if (!queryTry) queryTry = 0
 
     if (VK.Auth._loadState != 'loaded') {
       var authFunc = function(result) {
         if (result && result.session) {
-          VK.Observer.unsubscribe('auth.loginStatus', authFunc);
-          VK.Api.call(method, params, cb);
+          VK.Observer.unsubscribe('auth.loginStatus', authFunc)
+          VK.Api.call(method, params, cb)
         }
-      };
-      VK.Observer.subscribe('auth.loginStatus', authFunc);
-      VK.Auth.getLoginStatus();
-      return;
+      }
+      VK.Observer.subscribe('auth.loginStatus', authFunc)
+      VK.Auth.getLoginStatus()
+      return
     }
 
     if (VK.Api.queryLength(query) < 1500 && !VK.Api.ie6_7()) {
-      var useXDM = false;
-      var rnd = parseInt(Math.random() * 10000000, 10);
+      var useXDM = false
+      var rnd = parseInt(Math.random() * 10000000, 10)
       while (VK.Api._callbacks[rnd]) {
         rnd = parseInt(Math.random() * 10000000, 10)
       }
-      query.callback = 'VK.Api._callbacks['+rnd+']';
+      query.callback = 'VK.Api._callbacks['+rnd+']'
     } else {
-      var useXDM = true;
+      var useXDM = true
     }
 
     if (VK._session && VK._session.sid) {
-      query.access_token = VK._session.sid;
+      query.access_token = VK._session.sid
     }
 
-    qs = VK.Cookie.encode(query);
+    qs = VK.Cookie.encode(query)
 
     responseCb = function(response) {
       if (response.error && (response.error.error_code == 3 || response.error.error_code == 4 || response.error.error_code == 5)) {
-        if (queryTry > 3) return false;
+        if (queryTry > 3) return false
         var repeatCall = function(resp) {
-          VK.Observer.unsubscribe('auth.sessionChange', repeatCall);
-          delete params.access_token;
-          if (resp.session) VK.Api.call(method, params, cb, queryTry + 1);
+          VK.Observer.unsubscribe('auth.sessionChange', repeatCall)
+          delete params.access_token
+          if (resp.session) VK.Api.call(method, params, cb, queryTry + 1)
         }
-        VK.Observer.subscribe('auth.sessionChange', repeatCall);
-        VK.Auth.getLoginStatus();
+        VK.Observer.subscribe('auth.sessionChange', repeatCall)
+        VK.Auth.getLoginStatus()
       } else {
-        cb(response);
+        cb(response)
       }
-      if (!useXDM) delete VK.Api._callbacks[rnd];
-    };
+      if (!useXDM) delete VK.Api._callbacks[rnd]
+    }
 
     if (useXDM) {
       if (VK.xdReady) {
-        VK.XDM.remote.callMethod('apiCall', method, qs, responseCb);
+        VK.XDM.remote.callMethod('apiCall', method, qs, responseCb)
       } else {
         VK.Observer.subscribe('xdm.init', function() {
-          VK.XDM.remote.callMethod('apiCall', method, qs, responseCb);
-        });
-        VK.XDM.init();
+          VK.XDM.remote.callMethod('apiCall', method, qs, responseCb)
+        })
+        VK.XDM.init()
       }
     } else {
-      VK.Api._callbacks[rnd] = responseCb;
-      VK.Api.attachScript(VK._domain.api + 'method/' + method +'?' + qs);
+      VK.Api._callbacks[rnd] = responseCb
+      VK.Api.attachScript(VK._domain.api + 'method/' + method +'?' + qs)
     }
   },
   queryLength: function(query) {
     var len = 100, i; // sid + sig
     for (i in query) {
-      len += i.length + encodeURIComponent(query[i]).length + 1;
+      len += i.length + encodeURIComponent(query[i]).length + 1
     }
-    return len;
+    return len
   }
-};
+}
 
 // Alias
 VK.api = function(method, params, cb) {VK.Api.call(method, params, cb);}
-};
+}
 
 if (!VK.Auth) {
 VK.Auth = {
@@ -622,124 +622,124 @@ VK.Auth = {
         'session': session,
         'status': status,
         'settings': settings
-      };
+      }
 
-    VK._session = session;
+    VK._session = session
 
-    VK._userStatus = status;
+    VK._userStatus = status
 
-    VK.Cookie.set(session, resp);
+    VK.Cookie.set(session, resp)
 
     if (sessionChange || statusChange || both) {
       setTimeout(function() {
         if (statusChange) {
-          VK.Observer.publish('auth.statusChange', response);
+          VK.Observer.publish('auth.statusChange', response)
         }
 
         if (logout || both) {
-          VK.Observer.publish('auth.logout', response);
+          VK.Observer.publish('auth.logout', response)
         }
 
         if (login || both) {
-          VK.Observer.publish('auth.login', response);
+          VK.Observer.publish('auth.login', response)
         }
 
         if (sessionChange) {
-          VK.Observer.publish('auth.sessionChange', response);
+          VK.Observer.publish('auth.sessionChange', response)
         }
-      }, 0);
+      }, 0)
     }
 
-    return response;
+    return response
   },
   // Public VK.Auth methods
   login: function(cb, settings) {
-    var channel, url;
+    var channel, url
     if (!VK._apiId) {
-      return false;
+      return false
     }
-    channel = window.location.protocol + '//' + window.location.hostname;
-    url = VK._domain.main + VK._path.login + '?client_id='+VK._apiId+'&display=popup&redirect_uri=close.html&response_type=token';
+    channel = window.location.protocol + '//' + window.location.hostname
+    url = VK._domain.main + VK._path.login + '?client_id='+VK._apiId+'&display=popup&redirect_uri=close.html&response_type=token'
     if (settings && parseInt(settings, 10) > 0) {
-      url += '&scope=' + settings;
+      url += '&scope=' + settings
     }
-    VK.Observer.unsubscribe('auth.onLogin');
-    VK.Observer.subscribe('auth.onLogin', cb);
+    VK.Observer.unsubscribe('auth.onLogin')
+    VK.Observer.subscribe('auth.onLogin', cb)
     VK.UI.popup({
       width: 665,
       height: 370,
       url: url
-    });
+    })
     var authCallback = function() {
       VK.Auth.getLoginStatus(function(resp) {
-        VK.Observer.publish('auth.onLogin', resp);
-        VK.Observer.unsubscribe('auth.onLogin');
-      }, true);
+        VK.Observer.publish('auth.onLogin', resp)
+        VK.Observer.unsubscribe('auth.onLogin')
+      }, true)
     }
 
-    VK.UI.popupOpened = true;
+    VK.UI.popupOpened = true
     var popupCheck = function() {
-      if (!VK.UI.popupOpened) return false;
+      if (!VK.UI.popupOpened) return false
       try {
         if (!VK.UI.active.top || VK.UI.active.closed) {
-          VK.UI.popupOpened = false;
-          authCallback();
-          return true;
+          VK.UI.popupOpened = false
+          authCallback()
+          return true
         }
       } catch(e) {
-        VK.UI.popupOpened = false;
-        authCallback();
-        return true;
+        VK.UI.popupOpened = false
+        authCallback()
+        return true
       }
-      setTimeout(popupCheck, 100);
-    };
+      setTimeout(popupCheck, 100)
+    }
 
-    setTimeout(popupCheck, 100);
+    setTimeout(popupCheck, 100)
   },
   // Logout user from app, vk.com & login.vk.com
   logout: function(cb) {
-    VK.Auth.revokeGrants(cb);
+    VK.Auth.revokeGrants(cb)
   },
   revokeGrants: function(cb) {
     var onLogout = function(resp) {
-      VK.Observer.unsubscribe('auth.statusChange', onLogout);
-      if (cb) cb(resp);
+      VK.Observer.unsubscribe('auth.statusChange', onLogout)
+      if (cb) cb(resp)
     }
-    VK.Observer.subscribe('auth.statusChange', onLogout);
-    if (VK._session && VK._session.sid) VK.Api.attachScript('https://login.vk.com/?act=openapi&oauth=1&aid=' + parseInt(VK._apiId, 10) + '&location=' + encodeURIComponent(window.location.hostname)+'&do_logout=1&token='+VK._session.sid);
-    VK.Cookie.clear();
+    VK.Observer.subscribe('auth.statusChange', onLogout)
+    if (VK._session && VK._session.sid) VK.Api.attachScript('https://login.vk.com/?act=openapi&oauth=1&aid=' + parseInt(VK._apiId, 10) + '&location=' + encodeURIComponent(window.location.hostname)+'&do_logout=1&token='+VK._session.sid)
+    VK.Cookie.clear()
   },
   // Get current login status from session (sync) (not use on load time)
   getSession: function() {
-    return VK._session;
+    return VK._session
   },
   // Get current login status from vk.com (async)
   getLoginStatus: function(cb, force) {
     if (!VK._apiId) {
-      return;
+      return
     }
 
     if (cb) {
       if (!force && VK.Auth._loadState == 'loaded') {
-        cb({status: VK._userStatus, session: VK._session});
-        return;
+        cb({status: VK._userStatus, session: VK._session})
+        return
       } else {
-        VK.Observer.subscribe('auth.loginStatus', cb);
+        VK.Observer.subscribe('auth.loginStatus', cb)
       }
     }
 
     if (!force && VK.Auth._loadState == 'loading') {
-      return;
+      return
     }
 
-    VK.Auth._loadState = 'loading';
-    var rnd = parseInt(Math.random() * 10000000, 10);
+    VK.Auth._loadState = 'loading'
+    var rnd = parseInt(Math.random() * 10000000, 10)
     while (VK.Auth.lsCb[rnd]) {
       rnd = parseInt(Math.random() * 10000000, 10)
     }
     VK.Auth.lsCb[rnd] = function(response) {
-      delete VK.Auth.lsCb[rnd];
-      VK.Auth._loadState = 'loaded';
+      delete VK.Auth.lsCb[rnd]
+      VK.Auth._loadState = 'loaded'
       if (response && response.auth) {
         var session = {
           mid: response.user.id,
@@ -747,33 +747,33 @@ VK.Auth = {
           sig: response.sig,
           secret: response.secret,
           expire: response.expire
-        };
-        if (force) session.user = response.user;
-        var status = 'connected';
+        }
+        if (force) session.user = response.user
+        var status = 'connected'
       } else {
-        var session = null;
-        var status = response.user ? 'not_authorized' : 'unknown';
-        VK.Cookie.clear();
+        var session = null
+        var status = response.user ? 'not_authorized' : 'unknown'
+        VK.Cookie.clear()
       }
-      VK.Auth.setSession(session, status, false, response);
-      VK.Observer.publish('auth.loginStatus', {session: session, status: status});
-      VK.Observer.unsubscribe('auth.loginStatus');
-    };
+      VK.Auth.setSession(session, status, false, response)
+      VK.Observer.publish('auth.loginStatus', {session: session, status: status})
+      VK.Observer.unsubscribe('auth.loginStatus')
+    }
     // AttachScript here
-    VK.Api.attachScript('https://login.vk.com/?act=openapi&oauth=1&aid=' + parseInt(VK._apiId, 10) + '&location=' + encodeURIComponent(window.location.hostname)+'&rnd='+rnd);
+    VK.Api.attachScript('https://login.vk.com/?act=openapi&oauth=1&aid=' + parseInt(VK._apiId, 10) + '&location=' + encodeURIComponent(window.location.hostname)+'&rnd='+rnd)
   }
-};
+}
 }
 
 } else { // if VK.xdConnectionCallbacks
   setTimeout(function() {
-    var callback;
+    var callback
     while (callback = VK.xdConnectionCallbacks.pop()) {
-      callback();
+      callback()
     }
-  }, 0);
+  }, 0)
   if (VK.Widgets && !VK.Widgets._constructor) {
-    VK.Widgets = false;
+    VK.Widgets = false
   }
 }
 
@@ -796,19 +796,19 @@ VK.UI = {
         ',height=' + height +
         ',left=' + left +
         ',top=' + top
-      );
-      this.active = window.open(options.url, 'vk_openapi', features);
+      )
+      this.active = window.open(options.url, 'vk_openapi', features)
   },
   button: function(el, handler) {
-    var html = '';
+    var html = ''
 
     if (typeof el == 'string') {
-      el = document.getElementById(el);
+      el = document.getElementById(el)
     }
 
 
-    this._buttons.push(el);
-    index = this._buttons.length - 1;
+    this._buttons.push(el)
+    index = this._buttons.length - 1
 
     html = (
       '<table cellspacing="0" cellpadding="0" id="openapi_UI_' + index + '" onmouseover="VK.UI._change(1, ' + index + ');" onmouseout="VK.UI._change(0, ' + index + ');" onmousedown="VK.UI._change(2, ' + index + ');" onmouseup="VK.UI._change(1, ' + index + ');" style="cursor: pointer; border: 0px; font-family: tahoma, arial, verdana, sans-serif, Lucida Sans; font-size: 10px;"><tr style="vertical-align: middle">' +
@@ -816,150 +816,150 @@ VK.UI = {
       '<td><div style="background: url(' + VK._protocol + '//vk.com/images/btns.png) 0px -42px no-repeat; width: 21px; height: 21px"></div></td>' +
       '<td><div style="border: 1px solid #3b6798;border-radius: 0px 2px 2px 0px;-moz-border-radius: 0px 2px 2px 0px;-webkit-border-radius: 0px 2px 2px 0px;"><div style="border: 1px solid #5c82ab; border-top-color: #7e9cbc; background-color: #6D8DB1; color: #fff; text-shadow: 0px 1px #45688E; height: 15px; padding: 2px 6px 0px 4px;line-height: 13px;">&#1050;&#1086;&#1085;&#1090;&#1072;&#1082;&#1090;&#1077;</div></div></td>' +
       '</tr></table>'
-    );
-    el.innerHTML = html;
-    el.style.width = el.childNodes[0].offsetWidth + 'px';
+    )
+    el.innerHTML = html
+    el.style.width = el.childNodes[0].offsetWidth + 'px'
   },
   _change: function(state, index) {
-    var row = document.getElementById('openapi_UI_' + index).rows[0];
-    var elems = [row.cells[0].firstChild.firstChild, row.cells[2].firstChild.firstChild];
+    var row = document.getElementById('openapi_UI_' + index).rows[0]
+    var elems = [row.cells[0].firstChild.firstChild, row.cells[2].firstChild.firstChild]
     for (var i = 0; i < 2; ++i) {
-       var elem = elems[i];
+       var elem = elems[i]
       if (state === 0) {
-        elem.style.backgroundColor = '#6D8DB1';
-        elem.style.borderTopColor = '#7E9CBC';
-        elem.style.borderLeftColor = elem.style.borderRightColor = elem.style.borderBottomColor = '#5C82AB';
+        elem.style.backgroundColor = '#6D8DB1'
+        elem.style.borderTopColor = '#7E9CBC'
+        elem.style.borderLeftColor = elem.style.borderRightColor = elem.style.borderBottomColor = '#5C82AB'
       } else if (state == 1) {
-        elem.style.backgroundColor = '#7693B6';
-        elem.style.borderTopColor = '#88A4C4';
-        elem.style.borderLeftColor = elem.style.borderRightColor = elem.style.borderBottomColor = '#6088B4';
+        elem.style.backgroundColor = '#7693B6'
+        elem.style.borderTopColor = '#88A4C4'
+        elem.style.borderLeftColor = elem.style.borderRightColor = elem.style.borderBottomColor = '#6088B4'
       } else if (state == 2) {
-        elem.style.backgroundColor = '#6688AD';
-        elem.style.borderBottomColor = '#7495B8';
-        elem.style.borderLeftColor = elem.style.borderRightColor = elem.style.borderTopColor = '#51779F';
+        elem.style.backgroundColor = '#6688AD'
+        elem.style.borderBottomColor = '#7495B8'
+        elem.style.borderLeftColor = elem.style.borderRightColor = elem.style.borderTopColor = '#51779F'
       }
     }
     if (state === 0 || state == 2) {
-      row.cells[2].firstChild.style.backgroundPosition = '0px -42px';
+      row.cells[2].firstChild.style.backgroundPosition = '0px -42px'
     } else if (state == 1) {
-      row.cells[2].firstChild.style.backgroundPosition = '0px -63px';
+      row.cells[2].firstChild.style.backgroundPosition = '0px -63px'
     }
   }
-};
+}
 }
 
 if (!VK.XDM) {
 VK.XDM = {
   remote: null,
   init: function() {
-    if (this.remote) return false;
-    var url = VK._domain.api + VK._path.proxy;
+    if (this.remote) return false
+    var url = VK._domain.api + VK._path.proxy
     this.remote = new fastXDM.Server({
       onInit: function() {
-        VK.xdReady = true;
-        VK.Observer.publish('xdm.init');
+        VK.xdReady = true
+        VK.Observer.publish('xdm.init')
       }
-    });
+    })
 
     this.remote.append(document.getElementById(VK._rootId), {
       src: url
-    });
+    })
   },
   xdHandler: function(code) {
     try {
-      eval('VK.' + code);
+      eval('VK.' + code)
     } catch(e) {}
   }
-};
+}
 }
 
 if (!VK.Observer) {
 VK.Observer = {
   _subscribers: function() {
     if (!this._subscribersMap) {
-      this._subscribersMap = {};
+      this._subscribersMap = {}
     }
-    return this._subscribersMap;
+    return this._subscribersMap
   },
   publish: function(eventName) {
     var
       args = Array.prototype.slice.call(arguments),
       eventName = args.shift(),
       subscribers = this._subscribers()[eventName],
-      i, j;
+      i, j
 
-    if (!subscribers) return;
+    if (!subscribers) return
 
     for (i = 0, j = subscribers.length; i < j; i++) {
       if (subscribers[i] != null) {
-        subscribers[i].apply(this, args);
+        subscribers[i].apply(this, args)
       }
     }
   },
   subscribe: function(eventName, handler) {
     var
-      subscribers = this._subscribers();
+      subscribers = this._subscribers()
 
-    if (typeof handler != 'function') return false;
+    if (typeof handler != 'function') return false
 
     if (!subscribers[eventName]) {
-      subscribers[eventName] = [handler];
+      subscribers[eventName] = [handler]
     } else {
-      subscribers[eventName].push(handler);
+      subscribers[eventName].push(handler)
     }
   },
   unsubscribe: function(eventName, handler) {
     var
       subscribers = this._subscribers()[eventName],
-      i, j;
+      i, j
 
-    if (!subscribers) return false;
+    if (!subscribers) return false
     if (typeof handler == 'function') {
       for (i = 0, j = subscribers.length; i < j; i++) {
         if (subscribers[i] == handler) {
-          subscribers[i] = null;
+          subscribers[i] = null
         }
       }
     } else {
-      delete this._subscribers()[eventName];
+      delete this._subscribers()[eventName]
     }
   }
-};
+}
 }
 
 if (!VK.Widgets) {
-  VK.Widgets = {};
+  VK.Widgets = {}
 
-  VK.Widgets.count = 0;
-  VK.Widgets.RPC = {};
+  VK.Widgets.count = 0
+  VK.Widgets.RPC = {}
 
   VK.Widgets.loading = function(obj, enabled) {
-    obj.style.background = enabled ? 'url("' + VK._protocol + '//vk.com/images/upload.gif") center center no-repeat transparent' : 'none';
-  };
+    obj.style.background = enabled ? 'url("' + VK._protocol + '//vk.com/images/upload.gif") center center no-repeat transparent' : 'none'
+  }
 
   VK.Widgets.Comments = function(objId, options, page) {
-    var pData = VK.Util.getPageData();
-    if (!VK._apiId) throw Error('VK not initialized. Please use VK.init');
-    options = options || {};
+    var pData = VK.Util.getPageData()
+    if (!VK._apiId) throw Error('VK not initialized. Please use VK.init')
+    options = options || {}
     var params = {
       limit: options.limit || 10,
       height: options.height || 0,
       mini: options.mini === undefined ? 'auto' : options.mini,
       norealtime: options.norealtime ? 1 : 0
     }, mouseup = function() {
-      rpc.callMethod('mouseUp');
-      return false;
+      rpc.callMethod('mouseUp')
+      return false
     }, move = function(event) {
-      rpc.callMethod('mouseMove', {screenY: event.screenY});
-    }, iframe, rpc;
+      rpc.callMethod('mouseMove', {screenY: event.screenY})
+    }, iframe, rpc
 
     if (options.browse) { // browse all comments
-      params.browse = 1;
-      params.replies = options.replies || 0;
+      params.browse = 1
+      params.replies = options.replies || 0
     } else { // page
-      var url = options.pageUrl || pData.url;
+      var url = options.pageUrl || pData.url
       if (url.substr(0, 1) == '/') {
-        url = (location.protocol + '//' + location.host) + url;
+        url = (location.protocol + '//' + location.host) + url
       }
       VK.extend(params, {
         page: page || 0,
@@ -969,50 +969,50 @@ if (!VK.Widgets) {
         title: options.pageTitle || pData.title,
         description: options.pageDescription || pData.description,
         image: options.pageImage || pData.image
-      });
+      })
     }
     if (options.onChange) { // DEPRECATED
-      VK.Observer.subscribe('widgets.comments.new_comment', options.onChange);
-      VK.Observer.subscribe('widgets.comments.delete_comment', options.onChange);
+      VK.Observer.subscribe('widgets.comments.new_comment', options.onChange)
+      VK.Observer.subscribe('widgets.comments.delete_comment', options.onChange)
     }
 
     return VK.Widgets._constructor('widget_comments.php', objId, options, params, {
       showBox: function(url, props) {
         var box = VK.Util.Box((options.base_domain || VK._protocol + '//vk.com') + '/' + url, [], {
           proxy: function() {
-            rpc.callMethod.apply(rpc, arguments);
+            rpc.callMethod.apply(rpc, arguments)
           }
-        });
-        box.show();
+        })
+        box.show()
       },
       startDrag: function() {
-        cursorBack = window.document.body.style.cursor;
-        window.document.body.style.cursor = 'pointer';
-        VK.Util.addEvent('mousemove', move);
-        VK.Util.addEvent('mouseup', mouseup);
+        cursorBack = window.document.body.style.cursor
+        window.document.body.style.cursor = 'pointer'
+        VK.Util.addEvent('mousemove', move)
+        VK.Util.addEvent('mouseup', mouseup)
       },
       stopDrag: function() {
-        window.document.body.style.cursor = cursorBack;
-        VK.Util.removeEvent('mousemove', move);
-        VK.Util.removeEvent('mouseup', mouseup);
+        window.document.body.style.cursor = cursorBack
+        VK.Util.removeEvent('mousemove', move)
+        VK.Util.removeEvent('mouseup', mouseup)
       }
     }, {
       startHeight: 133,
       minWidth: 300,
       width: '100%'
-    }, function(o, i, r) {iframe = i; rpc = r;});
-  };
+    }, function(o, i, r) {iframe = i; rpc = r;})
+  }
 
   VK.Widgets.CommentsBrowse = function(objId, options) {
-    options = options || {};
-    options.browse = 1;
-    return VK.Widgets.Comments(objId, options);
-  };
+    options = options || {}
+    options.browse = 1
+    return VK.Widgets.Comments(objId, options)
+  }
 
   VK.Widgets.Recommended = function(objId, options) {
-    var pData = VK.Util.getPageData();
-    if (!VK._apiId) throw Error('VK not initialized. Please use VK.init');
-    options = options || {};
+    var pData = VK.Util.getPageData()
+    if (!VK._apiId) throw Error('VK not initialized. Please use VK.init')
+    options = options || {}
     var params = {
       limit: options.limit || 5,
       max: options.max || 0,
@@ -1020,50 +1020,50 @@ if (!VK.Widgets) {
       verb: options.verb || 0,
       period: options.period || 'week',
       target: options.target || 'parent'
-    };
+    }
     return VK.Widgets._constructor('widget_recommended.php', objId, options, params, {}, {
       startHeight: (90 + params.limit * 30),
       minWidth: 150,
       width: '100%'
-    });
-  };
+    })
+  }
 
   VK.Widgets.Post = function(objId, ownerId, postId, hash, options) {
-    options = options || {};
+    options = options || {}
     var params = {
       owner_id: ownerId,
       post_id: postId,
       hash: hash || '',
       width: options.width || 500
-    }, iframe, rpc, cursorBack;
+    }, iframe, rpc, cursorBack
     return VK.Widgets._constructor('widget_post.php', objId, options, params, {
       showBox: function(url, props) {
         var box = VK.Util.Box((options.base_domain || VK._protocol + '//vk.com') + '/' + url, [], {
           proxy: function() {
-            rpc.callMethod.apply(rpc, arguments);
+            rpc.callMethod.apply(rpc, arguments)
           }
-        });
-        box.show();
+        })
+        box.show()
       },
       startDrag: function() {
-        cursorBack = window.document.body.style.cursor;
-        window.document.body.style.cursor = 'pointer';
+        cursorBack = window.document.body.style.cursor
+        window.document.body.style.cursor = 'pointer'
       },
       stopDrag: function() {
-        window.document.body.style.cursor = cursorBack;
+        window.document.body.style.cursor = cursorBack
       }
     }, {
       startHeight: 90,
       minWidth: 250,
       width: '100%'
-    }, function(o, i, r) {iframe = i; rpc = r;});
-  };
+    }, function(o, i, r) {iframe = i; rpc = r;})
+  }
 
   VK.Widgets.Like = function(objId, options, page) {
-    var pData = VK.Util.getPageData();
-    if (!VK._apiId) throw Error('VK not initialized. Please use VK.init');
-    options = VK.extend(options || {}, {allowTransparency: true});
-    if (options.type == 'button' || options.type == 'vertical' || options.type == 'mini') delete options.width;
+    var pData = VK.Util.getPageData()
+    if (!VK._apiId) throw Error('VK not initialized. Please use VK.init')
+    options = VK.extend(options || {}, {allowTransparency: true})
+    if (options.type == 'button' || options.type == 'vertical' || options.type == 'mini') delete options.width
     var
       type = (options.type == 'full' || options.type == 'button' || options.type == 'vertical' || options.type == 'mini') ? options.type : 'full',
       width = type == 'full' ? Math.max(200, options.width || 350) : (type == 'button' ? 180 : (type == 'mini' ? 100 : 41)),
@@ -1083,39 +1083,39 @@ if (!VK.Widgets) {
       },
       ttHere = options.ttHere || false,
       isOver = false,
-      obj, buttonIfr, buttonRpc, tooltipIfr, tooltipRpc, checkTO, statsBox;
+      obj, buttonIfr, buttonRpc, tooltipIfr, tooltipRpc, checkTO, statsBox
 
     function showTooltip(force) {
-      if ((!isOver && !force) || !tooltipRpc) return;
-      if (!tooltipIfr || !tooltipRpc || tooltipIfr.style.display != 'none' && tooltipIfr.getAttribute('vkhidden') != 'yes') return;
-      var scrollTop = options.getScrollTop ? options.getScrollTop() : (document.body.scrollTop || document.documentElement.scrollTop || 0);
-      var objPos = VK.Util.getXY(obj, options.fixed);
-      var startY = ttHere ? 0 : objPos[1];
+      if ((!isOver && !force) || !tooltipRpc) return
+      if (!tooltipIfr || !tooltipRpc || tooltipIfr.style.display != 'none' && tooltipIfr.getAttribute('vkhidden') != 'yes') return
+      var scrollTop = options.getScrollTop ? options.getScrollTop() : (document.body.scrollTop || document.documentElement.scrollTop || 0)
+      var objPos = VK.Util.getXY(obj, options.fixed)
+      var startY = ttHere ? 0 : objPos[1]
       if (scrollTop > objPos[1] - 120 && options.tooltipPos != 'top' || type == 'vertical' || options.tooltipPos == 'bottom') {
-        tooltipIfr.style.top = (startY + height + 2) + 'px';
-        tooltipRpc.callMethod('show', false);
+        tooltipIfr.style.top = (startY + height + 2) + 'px'
+        tooltipRpc.callMethod('show', false)
       } else {
-        tooltipIfr.style.top = (startY - 125) + 'px';
-        tooltipRpc.callMethod('show', true);
+        tooltipIfr.style.top = (startY - 125) + 'px'
+        tooltipRpc.callMethod('show', true)
       }
-      VK.Util.ss(tooltipIfr, {left: ((ttHere ? 0 : objPos[0]) - (type == 'vertical' || type == 'mini' ? 36 : 2)) + 'px', display: 'block', opacity: 1, filter: 'none'});
-      tooltipIfr.setAttribute('vkhidden', 'no');
-      isOver = true;
+      VK.Util.ss(tooltipIfr, {left: ((ttHere ? 0 : objPos[0]) - (type == 'vertical' || type == 'mini' ? 36 : 2)) + 'px', display: 'block', opacity: 1, filter: 'none'})
+      tooltipIfr.setAttribute('vkhidden', 'no')
+      isOver = true
     }
 
     function hideTooltip(force) {
-      if ((isOver && !force) || !tooltipRpc) return;
-      tooltipRpc.callMethod('hide');
-      buttonRpc.callMethod('hide');
+      if ((isOver && !force) || !tooltipRpc) return
+      tooltipRpc.callMethod('hide')
+      buttonRpc.callMethod('hide')
       setTimeout(function() {
         tooltipIfr.style.display = 'none'
-      }, 400);
+      }, 400)
     }
 
     function handleStatsBox(act) {
-      hideTooltip(true);
-      statsBox = VK.Util.Box(buttonIfr.src + '&act=a_stats_box&widget_width=620');
-      statsBox.show();
+      hideTooltip(true)
+      statsBox = VK.Util.Box(buttonIfr.src + '&act=a_stats_box&widget_width=620')
+      statsBox.show()
     }
 
     return VK.Widgets._constructor('widget_like.php', objId, options, params, {
@@ -1123,36 +1123,36 @@ if (!VK.Widgets) {
         tooltipRpc = new fastXDM.Server({
           onInit: counter ? function() {showTooltip(true)} : function() {},
           proxy: function() {
-             buttonRpc.callMethod.apply(buttonRpc, arguments);
+             buttonRpc.callMethod.apply(buttonRpc, arguments)
           },
           showBox: function(url, props) {
             var box = VK.Util.Box((options.base_domain || VK._protocol + '//vk.com/') + url, [props.width, props.height], {
               proxy: function() {
-                tooltipRpc.callMethod.apply(tooltipRpc, arguments);
+                tooltipRpc.callMethod.apply(tooltipRpc, arguments)
               }
-            });
-            box.show();
+            })
+            box.show()
           },
           statsBox: handleStatsBox
-        }, false, {safe: true});
+        }, false, {safe: true})
         tooltipIfr = tooltipRpc.append(ttHere ? obj : document.body, {
           src: buttonIfr.src + '&act=a_like_tooltip',
           scrolling: 'no',
           allowTransparency: true,
           id: buttonIfr.id + '_tt',
           style: {position: 'absolute', padding: 0, display: 'block', opacity: 0.01, filter: 'alpha(opacity=1)', border: '0', width: '238px', height: '124px', zIndex: 5000, overflow: 'hidden'}
-        });
-        tooltipIfr.setAttribute('vkhidden', 'yes');
+        })
+        tooltipIfr.setAttribute('vkhidden', 'yes')
 
         obj.onmouseover = tooltipIfr.onmouseover = function() {
-          clearTimeout(checkTO);
-          isOver = true;
-        };
+          clearTimeout(checkTO)
+          isOver = true
+        }
         obj.onmouseout = tooltipIfr.onmouseout = function() {
-          clearTimeout(checkTO);
-          isOver = false;
-          checkTO = setTimeout(function() {hideTooltip(); }, 200);
-        };
+          clearTimeout(checkTO)
+          isOver = false
+          checkTO = setTimeout(function() {hideTooltip(); }, 200)
+        }
       },
       statsBox: handleStatsBox,
       showTooltip: showTooltip,
@@ -1160,44 +1160,44 @@ if (!VK.Widgets) {
       showBox: function(url, props) {
         var box = VK.Util.Box((options.base_domain || VK._protocol + '//vk.com/') + url, [], {
           proxy: function() {
-            buttonRpc.callMethod.apply(buttonRpc, arguments);
+            buttonRpc.callMethod.apply(buttonRpc, arguments)
           }
-        });
-        box.show();
+        })
+        box.show()
       },
       proxy: function() {if (tooltipRpc) tooltipRpc.callMethod.apply(tooltipRpc, arguments);}
     }, {
       startHeight: height,
       minWidth: width
     }, function(o, i, r) {
-      buttonRpc = r;
-      VK.Util.ss(obj = o, {height: height + 'px', width: width + 'px', position: 'relative', clear: 'both'});
-      VK.Util.ss(buttonIfr = i, {height: height + 'px', width: width + 'px', overflow: 'hidden', zIndex: 150});
-    });
-  };
+      buttonRpc = r
+      VK.Util.ss(obj = o, {height: height + 'px', width: width + 'px', position: 'relative', clear: 'both'})
+      VK.Util.ss(buttonIfr = i, {height: height + 'px', width: width + 'px', overflow: 'hidden', zIndex: 150})
+    })
+  }
 
   VK.Widgets.Poll = function(objId, options, pollId) {
-    var pData = VK.Util.getPageData();
-    // if (!VK._apiId) throw Error('VK not initialized. Please use VK.init');
-    if (!pollId) throw Error('No poll id passed');
-    options = options || {};
+    var pData = VK.Util.getPageData()
+    // if (!VK._apiId) throw Error('VK not initialized. Please use VK.init')
+    if (!pollId) throw Error('No poll id passed')
+    options = options || {}
     var params = {
       poll_id: pollId,
       url: options.pageUrl || pData.url || location.href,
       title: options.pageTitle || pData.title,
       description: options.pageDescription || pData.description
-    };
+    }
     return VK.Widgets._constructor('widget_poll.php', objId, options, params, {}, {
       startHeight: 133,
       minWidth: 300,
       width: '100%'
-    });
-  };
+    })
+  }
 
   VK.Widgets.PagePoll = function(objId, options, page) {
-    var pData = VK.Util.getPageData();
-    // if (!VK._apiId) throw Error('VK not initialized. Please use VK.init');
-    options = options || {};
+    var pData = VK.Util.getPageData()
+    // if (!VK._apiId) throw Error('VK not initialized. Please use VK.init')
+    options = options || {}
     var params = {
       page: page || 0,
       norealtime: options.norealtime ? 1 : 0,
@@ -1205,74 +1205,74 @@ if (!VK.Widgets) {
       url: options.pageUrl || pData.url || location.href,
       title: options.pageTitle || pData.title,
       description: options.pageDescription || pData.description
-    };
+    }
     return VK.Widgets._constructor('al_widget_poll.php', objId, options, params, {}, {
       startHeight: 133,
       minWidth: 300,
       width: '100%'
-    });
-  };
+    })
+  }
 
   VK.Widgets.Community = VK.Widgets.Group = function(objId, options, gid) {
-    gid = parseInt(gid, 10);
-    var RPC;
+    gid = parseInt(gid, 10)
+    var RPC
     if (!gid) {
-      throw Error('No group_id passed');
+      throw Error('No group_id passed')
     }
-    options.mode = parseInt(options.mode, 10).toString();
+    options.mode = parseInt(options.mode, 10).toString()
     var params = {
       gid: gid,
       mode: (options.mode) ? options.mode : '0'
-    };
-    if (!options.width) options.width = 200;
-    if (options.wall) params.wall = options.wall;
-    params.color1 = options.color1 || '';
-    params.color2 = options.color2 || '';
-    params.color3 = options.color3 || '';
-    params.class_name = options.class_name || '';
-    if (options.no_head) params.no_head = 1;
-    if (!options.height) options.height = 290;
+    }
+    if (!options.width) options.width = 200
+    if (options.wall) params.wall = options.wall
+    params.color1 = options.color1 || ''
+    params.color2 = options.color2 || ''
+    params.color3 = options.color3 || ''
+    params.class_name = options.class_name || ''
+    if (options.no_head) params.no_head = 1
+    if (!options.height) options.height = 290
     if (options.wide) {
-      params.wide = 1;
+      params.wide = 1
       if (options.width < 300) {
-        options.width = 300;
+        options.width = 300
       }
     }
 
-    var cursorBack;
+    var cursorBack
 
     function mouseup() {
-      RPC.callMethod('mouseUp');
-      return false;
+      RPC.callMethod('mouseUp')
+      return false
     }
 
     function move(event) {
-      RPC.callMethod('mouseMove', {screenY: event.screenY});
-      return false;
+      RPC.callMethod('mouseMove', {screenY: event.screenY})
+      return false
     }
 
     return VK.Widgets._constructor('widget_community.php', objId, options, params, {
       showBox: function(url, props) {
         var box = VK.Util.Box((options.base_domain || VK._protocol + '//vk.com/') + url, [], {
           proxy: function() {
-            rpc.callMethod.apply(rpc, arguments);
+            rpc.callMethod.apply(rpc, arguments)
           }
-        });
-        box.show();
+        })
+        box.show()
       },
       startDrag: function() {
-        cursorBack = window.document.body.style.cursor;
-        window.document.body.style.cursor = 'pointer';
-        VK.Util.addEvent('mousemove', move);
-        VK.Util.addEvent('mouseup', mouseup);
+        cursorBack = window.document.body.style.cursor
+        window.document.body.style.cursor = 'pointer'
+        VK.Util.addEvent('mousemove', move)
+        VK.Util.addEvent('mouseup', mouseup)
       },
       stopDrag: function() {
-        window.document.body.style.cursor = cursorBack;
-        VK.Util.removeEvent('mousemove', move);
-        VK.Util.removeEvent('mouseup', mouseup);
+        window.document.body.style.cursor = cursorBack
+        VK.Util.removeEvent('mousemove', move)
+        VK.Util.removeEvent('mouseup', mouseup)
       },
       auth: function() {
-        VK.Auth.login(null, 1);
+        VK.Auth.login(null, 1)
       }
     }, {
       minWidth: 120,
@@ -1280,412 +1280,412 @@ if (!VK.Widgets) {
       height: '290',
       startHeight: 200
     }, function(o, i, r) {
-      RPC = r;
-    });
-  };
+      RPC = r
+    })
+  }
 
   VK.Widgets.Auth = function(objId, options) {
-    var pData = VK.Util.getPageData();
-    if (!VK._apiId) throw Error('VK not initialized. Please use VK.init');
+    var pData = VK.Util.getPageData()
+    if (!VK._apiId) throw Error('VK not initialized. Please use VK.init')
     if (!options.width) {
-      options.width = 200;
+      options.width = 200
     }
     if (options.type) {
-      type = 1;
+      type = 1
     } else {
-      type = 0;
+      type = 0
     }
     return VK.Widgets._constructor('widget_auth.php', objId, options, {}, {makeAuth: function(data) {
       if (data.session) {
-        VK.Auth._loadState = 'loaded';
-        VK.Auth.setSession(data.session, 'connected');
-        VK.Observer.publish('auth.loginStatus', {session: data.session, status: 'connected'});
-        VK.Observer.unsubscribe('auth.loginStatus');
+        VK.Auth._loadState = 'loaded'
+        VK.Auth.setSession(data.session, 'connected')
+        VK.Observer.publish('auth.loginStatus', {session: data.session, status: 'connected'})
+        VK.Observer.unsubscribe('auth.loginStatus')
       }
       if (options.onAuth) {
-        options.onAuth(data);
+        options.onAuth(data)
       } else {
         if (options.authUrl) {
-          var href = options.authUrl;
+          var href = options.authUrl
         } else {
-          var href = window.location.href;
+          var href = window.location.href
         }
         if (href.indexOf('?') == -1) {
-          href+='?';
+          href+='?'
         } else {
-          href+='&';
+          href+='&'
         }
-        var vars = [];
+        var vars = []
 
         for (var i in data) {
-          if (i != 'session') vars.push(i+'='+decodeURIComponent(data[i]).replace(/&/g, '%26').replace(/\?/, '%3F'));
+          if (i != 'session') vars.push(i+'='+decodeURIComponent(data[i]).replace(/&/g, '%26').replace(/\?/, '%3F'))
         }
-        window.location.href = href + vars.join('&');
+        window.location.href = href + vars.join('&')
       }
-    }}, {startHeight: 80});
-  };
+    }}, {startHeight: 80})
+  }
 
   VK.Widgets.Subscribe = function(objId, options, oid) {
-    oid = parseInt(oid, 10);
-    var RPC;
+    oid = parseInt(oid, 10)
+    var RPC
     if (!oid) {
-      throw Error('No owner_id passed');
+      throw Error('No owner_id passed')
     }
     var params = {
       oid: oid
-    };
+    }
     if (options.mode) {
-      params.mode = options.mode;
+      params.mode = options.mode
     }
     if (options.soft) {
-      params.soft = options.soft;
+      params.soft = options.soft
     }
 
     return VK.Widgets._constructor('widget_subscribe.php', objId, options, params, {
       showBox: function(url, props) {
         var box = VK.Util.Box((options.base_domain || VK._protocol + '//vk.com/') + url, [], {
           proxy: function() {
-            rpc.callMethod.apply(rpc, arguments);
+            rpc.callMethod.apply(rpc, arguments)
           }
-        });
-        box.show();
+        })
+        box.show()
       },
       auth: function() {
-        VK.Auth.login(null, 1);
+        VK.Auth.login(null, 1)
       }
     }, {
       minWidth: 220,
       startHeight: 22,
       height: options.height || 22
     }, function(o, i, r) {
-      RPC = r;
-    });
-  };
+      RPC = r
+    })
+  }
 
   VK.Widgets.Ads = function(objId, options, paramsExtra) {
-    options = options || {};
-    paramsExtra = paramsExtra || {};
-    var params = {};
-    var defaults = {};
-    var funcs = {};
-    var obj = document.getElementById(objId);
-    var iframe;
-    var rpc;
+    options = options || {}
+    paramsExtra = paramsExtra || {}
+    var params = {}
+    var defaults = {}
+    var funcs = {}
+    var obj = document.getElementById(objId)
+    var iframe
+    var rpc
 
-    var adsParams = {};
-    var adsParamsLocal = {};
-    var adsParamsDefault = {};
+    var adsParams = {}
+    var adsParamsLocal = {}
+    var adsParamsDefault = {}
     for (var key in paramsExtra) {
-      var keyFix = (inArray(key, ['hash']) ? key : 'ads_' + key);
-      adsParams[keyFix] = paramsExtra[key];
+      var keyFix = (inArray(key, ['hash']) ? key : 'ads_' + key)
+      adsParams[keyFix] = paramsExtra[key]
     }
 
     if (obj && obj.getBoundingClientRect) {
-      obj.style.width  = '100%';
-      obj.style.height = '100%';
-      var rect = obj.getBoundingClientRect();
-      obj.style.width  = '';
-      obj.style.height = '';
-      adsParams.ads_ad_unit_width_auto  = Math.floor(rect.right - rect.left);
-      adsParams.ads_ad_unit_height_auto = Math.floor(rect.bottom - rect.top);
+      obj.style.width  = '100%'
+      obj.style.height = '100%'
+      var rect = obj.getBoundingClientRect()
+      obj.style.width  = ''
+      obj.style.height = ''
+      adsParams.ads_ad_unit_width_auto  = Math.floor(rect.right - rect.left)
+      adsParams.ads_ad_unit_height_auto = Math.floor(rect.bottom - rect.top)
     }
 
-    adsParamsDefault.ads_ad_unit_width  = 100;
-    adsParamsDefault.ads_ad_unit_height = 100;
+    adsParamsDefault.ads_ad_unit_width  = 100
+    adsParamsDefault.ads_ad_unit_height = 100
 
-    adsParamsLocal.ads_ad_unit_width  = (parseInt(adsParams.ads_ad_unit_width)  || adsParams.ads_ad_unit_width === 'auto'  && adsParams.ads_ad_unit_width_auto  || adsParamsDefault.ads_ad_unit_width);
-    adsParamsLocal.ads_ad_unit_height = (parseInt(adsParams.ads_ad_unit_height) || adsParams.ads_ad_unit_height === 'auto' && adsParams.ads_ad_unit_height_auto || adsParamsDefault.ads_ad_unit_height);
+    adsParamsLocal.ads_ad_unit_width  = (parseInt(adsParams.ads_ad_unit_width)  || adsParams.ads_ad_unit_width === 'auto'  && adsParams.ads_ad_unit_width_auto  || adsParamsDefault.ads_ad_unit_width)
+    adsParamsLocal.ads_ad_unit_height = (parseInt(adsParams.ads_ad_unit_height) || adsParams.ads_ad_unit_height === 'auto' && adsParams.ads_ad_unit_height_auto || adsParamsDefault.ads_ad_unit_height)
     if (adsParams.ads_handler) {
-      adsParamsLocal.ads_handler = adsParams.ads_handler;
+      adsParamsLocal.ads_handler = adsParams.ads_handler
     }
     if (adsParams.ads_handler_empty_html) {
-      adsParamsLocal.ads_handler_empty_html = adsParams.ads_handler_empty_html;
+      adsParamsLocal.ads_handler_empty_html = adsParams.ads_handler_empty_html
     }
 
-    delete adsParams.ads_handler;
-    delete adsParams.ads_handler_empty_html;
+    delete adsParams.ads_handler
+    delete adsParams.ads_handler_empty_html
 
-    params.act = 'ads_web';
-    params.url = location.href;
-    VK.extend(params, adsParams);
+    params.act = 'ads_web'
+    params.url = location.href
+    VK.extend(params, adsParams)
 
-    options.noDefaultParams   = true;
-    options.width             = adsParamsLocal.ads_ad_unit_width;
-    options.allowTransparency = true;
-    defaults.startHeight = adsParamsLocal.ads_ad_unit_height;
-    defaults.minWidth    = adsParamsLocal.ads_ad_unit_width;
-    funcs.adsOnInitLoader = adsOnInitLoader;
-    funcs.adsOnInit       = adsOnInit;
+    options.noDefaultParams   = true
+    options.width             = adsParamsLocal.ads_ad_unit_width
+    options.allowTransparency = true
+    defaults.startHeight = adsParamsLocal.ads_ad_unit_height
+    defaults.minWidth    = adsParamsLocal.ads_ad_unit_width
+    funcs.adsOnInitLoader = adsOnInitLoader
+    funcs.adsOnInit       = adsOnInit
 
-    return VK.Widgets._constructor('ads_rotate.php', objId, options, params, funcs, defaults, onDone);
+    return VK.Widgets._constructor('ads_rotate.php', objId, options, params, funcs, defaults, onDone)
 
     function adsOnInitLoader(adsScriptVersion) {
-      VK.Widgets.loading(obj, true);
-      adsAttachScript(adsScriptVersion);
+      VK.Widgets.loading(obj, true)
+      adsAttachScript(adsScriptVersion)
     }
     function adsOnInit(errorCode, adsParamsExport) {
-      VK.Widgets.loading(obj, false);
-      adsProcessParams(adsParamsExport);
-      if (options.onAdsReady) options.onAdsReady.apply(options.onAdsReady, Array.prototype.slice.call(arguments));
-      adsProcessHandler(errorCode);
+      VK.Widgets.loading(obj, false)
+      adsProcessParams(adsParamsExport)
+      if (options.onAdsReady) options.onAdsReady.apply(options.onAdsReady, Array.prototype.slice.call(arguments))
+      adsProcessHandler(errorCode)
     }
     function adsAttachScript(adsScriptVersion) {
       if (!('vk__adsLight' in window)) {
-        window.vk__adsLight = false;
-        adsScriptVersion = parseInt(adsScriptVersion);
-        var attachScriptFunc = (VK.Api && VK.Api.attachScript || VK.addScript);
-        var base_domain = (options.base_domain || VK._protocol + '//vk.com');
-        attachScriptFunc(base_domain + '/js/al/aes_light.js?' + adsScriptVersion);
+        window.vk__adsLight = false
+        adsScriptVersion = parseInt(adsScriptVersion)
+        var attachScriptFunc = (VK.Api && VK.Api.attachScript || VK.addScript)
+        var base_domain = (options.base_domain || VK._protocol + '//vk.com')
+        attachScriptFunc(base_domain + '/js/al/aes_light.js?' + adsScriptVersion)
       } else if (window.vk__adsLight && vk__adsLight.userHandlers && vk__adsLight.userHandlers.onInit) {
         vk__adsLight.userHandlers.onInit(false); // false - do not publish initial onInit
       }
     }
     function adsProcessParams(adsParamsExport) {
       if (!adsParamsExport) {
-        return;
+        return
       }
       for (var paramName in adsParamsExport) {
-        var paramValue = adsParamsExport[paramName];
+        var paramValue = adsParamsExport[paramName]
         if (paramName === 'ads_ad_unit_width' || paramName === 'ads_ad_unit_height') {
           if (!(paramName in adsParams)) {
-            adsParamsLocal[paramName] = (parseInt(paramValue) || paramValue === 'auto' && adsParams[paramName + '_auto'] || adsParamsDefault[paramName]);
+            adsParamsLocal[paramName] = (parseInt(paramValue) || paramValue === 'auto' && adsParams[paramName + '_auto'] || adsParamsDefault[paramName])
           }
         } else {
           if (!(paramName in adsParamsLocal)) {
-            adsParamsLocal[paramName] = paramValue;
+            adsParamsLocal[paramName] = paramValue
           }
         }
       }
     }
     function adsProcessHandler(errorCode) {
-      var handlerResult = adsEvalHandler(adsParamsLocal.ads_handler, errorCode);
+      var handlerResult = adsEvalHandler(adsParamsLocal.ads_handler, errorCode)
       if (errorCode <= 0 && handlerResult !== true) {
         try { console.log('VK: ad_unit_id = ' + adsParams.ads_ad_unit_id, ', errorCode = ', errorCode); } catch (e) {}
-        adsInsertHtmlHandler(adsParamsLocal.ads_handler_empty_html, adsParamsLocal.ads_ad_unit_width, adsParamsLocal.ads_ad_unit_height);
+        adsInsertHtmlHandler(adsParamsLocal.ads_handler_empty_html, adsParamsLocal.ads_ad_unit_width, adsParamsLocal.ads_ad_unit_height)
       }
     }
     function adsEvalHandler(handler) {
-      var result = false;
+      var result = false
       try {
         if (!handler) {
-          return false;
+          return false
         }
-        var func = false;
+        var func = false
         if (isFunction(handler)) {
-          func = handler;
+          func = handler
         } else if (isString(handler)) {
-          var handlerFuncs = handler.split('.');
-          func = window;
+          var handlerFuncs = handler.split('.')
+          func = window
           for (var i = 0, len = handlerFuncs.length; i < len; i++) {
-            func = func[handlerFuncs[i]];
+            func = func[handlerFuncs[i]]
             if (!func) {
-              break;
+              break
             }
           }
           if (!func) {
             if (handler.substr(0, 8) === 'function') {
-              handler = 'return ' + handler + ';';
+              handler = 'return ' + handler + ';'
             }
-            var handlerResult = (new Function(handler))();
+            var handlerResult = (new Function(handler))()
             if (isFunction(handlerResult)) {
-              func = handlerResult;
+              func = handlerResult
             } else {
-              result = handlerResult;
+              result = handlerResult
             }
           }
         }
         if (func) {
-          var args = Array.prototype.slice.call(arguments, 1);
-          result = func.apply(func, args);
+          var args = Array.prototype.slice.call(arguments, 1)
+          result = func.apply(func, args)
         }
       } catch (e) {
         try {
-          console.error(e);
+          console.error(e)
         } catch (e2) {}
       }
 
-      return result;
+      return result
 
       function isFunction(obj) {
-        return Object.prototype.toString.call(obj) === '[object Function]';
+        return Object.prototype.toString.call(obj) === '[object Function]'
       }
       function isString(obj) {
-        return Object.prototype.toString.call(obj) === '[object String]';
+        return Object.prototype.toString.call(obj) === '[object String]'
       }
     }
     function adsInsertHtmlHandler(handlerHtml, width, height) {
       if (!handlerHtml) {
-        return;
+        return
       }
       if (!obj) {
-        return;
+        return
       }
 
-      width  = (width  ? width  + 'px' : '');
-      height = (height ? height + 'px' : '');
+      width  = (width  ? width  + 'px' : '')
+      height = (height ? height + 'px' : '')
 
-      var iframeHandlerHtml = '<html><head></head><body style="padding: 0; margin: 0;"><div>' + handlerHtml + '</div></body></html>';
+      var iframeHandlerHtml = '<html><head></head><body style="padding: 0; margin: 0;"><div>' + handlerHtml + '</div></body></html>'
 
-      var iframeHandler = document.createElement('iframe');
-      iframeHandler.onload            = fixIframeHeight;
-      iframeHandler.id                = (iframe ? iframe.id : ('vkwidget-' + Math.round(Math.random() * 1000000))) + '_ads_html_handler';
-      iframeHandler.src               = 'about:blank';
-      iframeHandler.width             = '100%';
-      iframeHandler.height            = '100%';
-      iframeHandler.scrolling         = 'no';
-      iframeHandler.frameBorder       = '0';
-      iframeHandler.allowTransparency = true;
-      iframeHandler.style.overflow    = 'hidden';
-      iframeHandler.style.width       = width;
-      iframeHandler.style.height      = height;
+      var iframeHandler = document.createElement('iframe')
+      iframeHandler.onload            = fixIframeHeight
+      iframeHandler.id                = (iframe ? iframe.id : ('vkwidget-' + Math.round(Math.random() * 1000000))) + '_ads_html_handler'
+      iframeHandler.src               = 'about:blank'
+      iframeHandler.width             = '100%'
+      iframeHandler.height            = '100%'
+      iframeHandler.scrolling         = 'no'
+      iframeHandler.frameBorder       = '0'
+      iframeHandler.allowTransparency = true
+      iframeHandler.style.overflow    = 'hidden'
+      iframeHandler.style.width       = width
+      iframeHandler.style.height      = height
 
-      obj.style.width                 = width;
-      obj.style.height                = height;
+      obj.style.width                 = width
+      obj.style.height                = height
 
-      obj.appendChild(iframeHandler);
+      obj.appendChild(iframeHandler)
 
-      iframeHandler.contentWindow.vk_ads_html_handler = iframeHandlerHtml;
-      iframeHandler.src = 'javascript:window["vk_ads_html_handler"]';
+      iframeHandler.contentWindow.vk_ads_html_handler = iframeHandlerHtml
+      iframeHandler.src = 'javascript:window["vk_ads_html_handler"]'
 
       function fixIframeHeight() {
         if (height) {
-          return;
+          return
         }
         try {
-          var rect = iframeHandler.contentWindow.document.body.firstChild.getBoundingClientRect();
-          var heightFix = Math.ceil(rect.bottom - rect.top);
+          var rect = iframeHandler.contentWindow.document.body.firstChild.getBoundingClientRect()
+          var heightFix = Math.ceil(rect.bottom - rect.top)
           if (heightFix) {
-            iframeHandler.style.height = heightFix;
-            obj.style.height           = heightFix;
+            iframeHandler.style.height = heightFix
+            obj.style.height           = heightFix
           }
         } catch (e) {}
       }
     }
     function indexOf(arr, value, from) {
       for (var i = from || 0, l = (arr || []).length; i < l; i++) {
-        if (arr[i] == value) return i;
+        if (arr[i] == value) return i
       }
-      return -1;
+      return -1
     }
     function inArray(value, arr) {
-      return indexOf(arr, value) != -1;
+      return indexOf(arr, value) != -1
     }
     function onDone(o, i, r) {
-      obj = o;
-      iframe = i;
-      rpc = r;
+      obj = o
+      iframe = i
+      rpc = r
     }
-  };
+  }
 
   VK.Widgets._constructor = function(widgetUrl, objId, options, params, funcs, defaults, onDone, widgetId, iter) {
-    var obj = document.getElementById(objId);
-    widgetId = widgetId || (++VK.Widgets.count);
+    var obj = document.getElementById(objId)
+    widgetId = widgetId || (++VK.Widgets.count)
 
     if (!obj) {
-      iter = iter || 0;
+      iter = iter || 0
       if (iter > 10) {
-        throw Error('VK.Widgets: object #' + objId + ' not found.');
+        throw Error('VK.Widgets: object #' + objId + ' not found.')
       }
       setTimeout(function() {
-        VK.Widgets._constructor(widgetUrl, objId, options, params, funcs, defaults, onDone, widgetId, iter + 1);
-      }, 500);
-      return widgetId;
+        VK.Widgets._constructor(widgetUrl, objId, options, params, funcs, defaults, onDone, widgetId, iter + 1)
+      }, 500)
+      return widgetId
     }
 
-    var ifr, base_domain, width, url, urlQueryString, encodedParam, rpc, iframe, i;
-    options = options || {};
-    defaults = defaults || {};
-    funcs = funcs || {};
+    var ifr, base_domain, width, url, urlQueryString, encodedParam, rpc, iframe, i
+    options = options || {}
+    defaults = defaults || {}
+    funcs = funcs || {}
 
-    base_domain = options.base_domain || VK._protocol + '//vk.com';
-    width = (options.width == 'auto') ? obj.clientWidth || '100%' : parseInt(options.width, 10);
+    base_domain = options.base_domain || VK._protocol + '//vk.com'
+    width = (options.width == 'auto') ? obj.clientWidth || '100%' : parseInt(options.width, 10)
 
     if (options.height) {
-      params.height = options.height;
-      obj.style.height = options.height + 'px';
+      params.height = options.height
+      obj.style.height = options.height + 'px'
     } else {
-      obj.style.height = (defaults.startHeight || 200) + 'px';
+      obj.style.height = (defaults.startHeight || 200) + 'px'
     }
 
-    width = width ? (Math.max(defaults.minWidth || 200, Math.min(10000, width)) + 'px') : '100%';
+    width = width ? (Math.max(defaults.minWidth || 200, Math.min(10000, width)) + 'px') : '100%'
 
     if (!params.url) {
-      params.url = options.pageUrl || location.href.replace(/#.*$/, '');
+      params.url = options.pageUrl || location.href.replace(/#.*$/, '')
     }
-    url = base_domain + '/' + widgetUrl;
-    urlQueryString = '';
+    url = base_domain + '/' + widgetUrl
+    urlQueryString = ''
     if (!options.noDefaultParams) {
       urlQueryString += '&app=' + (VK._apiId || '0') + '&width=' + width
     }
     urlQueryString += '&_ver=' + VK.version
     if (VK._iframeAppWidget) {
-      params.iframe_app = 1;
+      params.iframe_app = 1
     }
     for (i in params) {
-      if (i == 'title' && params[i].length > 80) params[i] = params[i].substr(0, 80)+'...';
-      if (i == 'description' && params[i].length > 160) params[i] = params[i].substr(0, 160)+'...';
+      if (i == 'title' && params[i].length > 80) params[i] = params[i].substr(0, 80)+'...'
+      if (i == 'description' && params[i].length > 160) params[i] = params[i].substr(0, 160)+'...'
       if (typeof(params[i]) == 'number') {
-        encodedParam = params[i];
+        encodedParam = params[i]
       } else {
         try {
-          encodedParam = encodeURIComponent(params[i]);
+          encodedParam = encodeURIComponent(params[i])
         } catch (e) {
-          encodedParam = '';
+          encodedParam = ''
         }
       }
-      urlQueryString += '&' + i + '=' + encodedParam;
+      urlQueryString += '&' + i + '=' + encodedParam
     }
-    urlQueryString += '&' + (+new Date()).toString(16);
-    url += '?' + urlQueryString.substr(1);
+    urlQueryString += '&' + (+new Date()).toString(16)
+    url += '?' + urlQueryString.substr(1)
 
-    obj.style.width = width;
-    VK.Widgets.loading(obj, true);
+    obj.style.width = width
+    VK.Widgets.loading(obj, true)
 
     funcs.publish = function() {
-      var args = Array.prototype.slice.call(arguments);
-      args.push(widgetId);
-      VK.Observer.publish.apply(VK.Observer, args);
-    };
+      var args = Array.prototype.slice.call(arguments)
+      args.push(widgetId)
+      VK.Observer.publish.apply(VK.Observer, args)
+    }
     funcs.onInit = function() {
-      VK.Widgets.loading(obj, false);
-      if (funcs.onReady) funcs.onReady();
-      if (options.onReady) options.onReady();
+      VK.Widgets.loading(obj, false)
+      if (funcs.onReady) funcs.onReady()
+      if (options.onReady) options.onReady()
     }
     funcs.resize = function(e, cb) {
-      obj.style.height = e + 'px';
-      var el = document.getElementById('vkwidget' + widgetId);
+      obj.style.height = e + 'px'
+      var el = document.getElementById('vkwidget' + widgetId)
       if (el) {
-        el.style.height = e + 'px';
+        el.style.height = e + 'px'
       }
     }
     funcs.resizeWidget = function(newWidth, newHeight) {
-      newWidth  = parseInt(newWidth);
-      newHeight = parseInt(newHeight);
-      var widgetElem = document.getElementById('vkwidget' + widgetId);
+      newWidth  = parseInt(newWidth)
+      newHeight = parseInt(newHeight)
+      var widgetElem = document.getElementById('vkwidget' + widgetId)
       if (isFinite(newWidth)) {
-        obj.style.width = newWidth + 'px';
+        obj.style.width = newWidth + 'px'
         if (widgetElem) {
-          widgetElem.style.width = newWidth + 'px';
+          widgetElem.style.width = newWidth + 'px'
         }
       }
       if (isFinite(newHeight)) {
-        obj.style.height = newHeight + 'px';
+        obj.style.height = newHeight + 'px'
         if (widgetElem) {
-          widgetElem.style.height = newHeight + 'px';
+          widgetElem.style.height = newHeight + 'px'
         }
       }
-      if (options.onResizeWidget) options.onResizeWidget();
+      if (options.onResizeWidget) options.onResizeWidget()
     }
     funcs.updateVersion = function(ver) {
       if (ver > 1) {
-        VK.Api.attachScript('//vk.com/js/api/openapi_update.js?'+parseInt(ver));
+        VK.Api.attachScript('//vk.com/js/api/openapi_update.js?'+parseInt(ver))
       }
     }
     rpc = VK.Widgets.RPC[widgetId] = new fastXDM.Server(funcs, function(origin) {
-      if (!origin) return true;
-      origin = origin.toLowerCase();
-      return (origin.match(/(\.|\/)vk\.com($|\/|\?)/));
-    }, {safe: true});
+      if (!origin) return true
+      origin = origin.toLowerCase()
+      return (origin.match(/(\.|\/)vk\.com($|\/|\?)/))
+    }, {safe: true})
     iframe = VK.Widgets.RPC[widgetId].append(obj, {
       src: url,
       width: (width.indexOf('%') != -1) ? width : (parseInt(width) || width),
@@ -1696,117 +1696,117 @@ if (!VK.Widgets) {
       style: {
         overflow: 'hidden'
       }
-    });
-    onDone && setTimeout(function() {onDone(obj, iframe || obj.firstChild, rpc);}, 10);
-    return widgetId;
-  };
+    })
+    onDone && setTimeout(function() {onDone(obj, iframe || obj.firstChild, rpc);}, 10)
+    return widgetId
+  }
 }
 
 if (!VK.Util) {
 VK.Util = {
   getPageData: function() {
     if (!VK._pData) {
-      var metas = document.getElementsByTagName('meta'), pData = {}, keys = ['description', 'title', 'url', 'image', 'app_id'], metaName;
+      var metas = document.getElementsByTagName('meta'), pData = {}, keys = ['description', 'title', 'url', 'image', 'app_id'], metaName
       for (var i in metas) {
-        if (!metas[i].getAttribute) continue;
+        if (!metas[i].getAttribute) continue
         if (metas[i].getAttribute && ((metaName = metas[i].getAttribute('name')) || (metaName = metas[i].getAttribute('property')))) {
           for (var j in keys) {
             if (metaName == keys[j] || metaName == 'og:'+keys[j] || metaName == 'vk:'+keys[j]) {
-              pData[keys[j]] = metas[i].content;
+              pData[keys[j]] = metas[i].content
             }
           }
         }
       }
       if (pData.app_id && !VK._apiId) {
-        VK._apiId = pData.app_id;
+        VK._apiId = pData.app_id
       }
-      pData.title = pData.title || document.title || '';
-      pData.description = pData.description || '';
-      pData.image = pData.image || '';
+      pData.title = pData.title || document.title || ''
+      pData.description = pData.description || ''
+      pData.image = pData.image || ''
       if (!pData.url && VK._iframeAppWidget && VK._apiId) {
-        pData.url = '/app' + VK._apiId;
+        pData.url = '/app' + VK._apiId
         if (VK._browserHash) {
           pData.url += VK._browserHash
         }
       }
-      var loc = location.href.replace(/#.*$/, '');
+      var loc = location.href.replace(/#.*$/, '')
       if (!pData.url || !pData.url.indexOf(loc)) {
-        pData.url = loc;
+        pData.url = loc
       }
-      VK._pData = pData;
+      VK._pData = pData
     }
-    return VK._pData;
+    return VK._pData
   },
   getStyle: function(elem, name) {
-    var ret, defaultView = document.defaultView || window;
+    var ret, defaultView = document.defaultView || window
     if (defaultView.getComputedStyle) {
-      name = name.replace(/([A-Z])/g, '-$1').toLowerCase();
-      var computedStyle = defaultView.getComputedStyle(elem, null);
+      name = name.replace(/([A-Z])/g, '-$1').toLowerCase()
+      var computedStyle = defaultView.getComputedStyle(elem, null)
       if (computedStyle) {
-        ret = computedStyle.getPropertyValue(name);
+        ret = computedStyle.getPropertyValue(name)
       }
     } else if (elem.currentStyle) {
       var camelCase = name.replace(/\-(\w)/g, function(all, letter){
-        return letter.toUpperCase();
-      });
-      ret = elem.currentStyle[name] || elem.currentStyle[camelCase];
+        return letter.toUpperCase()
+      })
+      ret = elem.currentStyle[name] || elem.currentStyle[camelCase]
     }
 
-    return ret;
+    return ret
   },
   getXY: function(obj, fixed) {
-    if (!obj || obj === undefined) return;
+    if (!obj || obj === undefined) return
 
-    var left = 0, top = 0;
+    var left = 0, top = 0
     if (obj.getBoundingClientRect !== undefined) {
-      var rect = obj.getBoundingClientRect();
-      left = rect.left;
-      top = rect.top;
-      fixed = true;
+      var rect = obj.getBoundingClientRect()
+      left = rect.left
+      top = rect.top
+      fixed = true
     } else if (obj.offsetParent) {
       do {
-        left += obj.offsetLeft;
-        top += obj.offsetTop;
+        left += obj.offsetLeft
+        top += obj.offsetTop
         if (fixed) {
-          left -= obj.scrollLeft;
-          top -= obj.scrollTop;
+          left -= obj.scrollLeft
+          top -= obj.scrollTop
         }
-      } while (obj = obj.offsetParent);
+      } while (obj = obj.offsetParent)
     }
     if (fixed) {
-      top += window.pageYOffset || window.scrollNode && scrollNode.scrollTop || document.documentElement.scrollTop;
-      left += window.pageXOffset || window.scrollNode && scrollNode.scrollLeft || document.documentElement.scrollLeft;
+      top += window.pageYOffset || window.scrollNode && scrollNode.scrollTop || document.documentElement.scrollTop
+      left += window.pageXOffset || window.scrollNode && scrollNode.scrollLeft || document.documentElement.scrollLeft
     }
 
-    return [left, top];
+    return [left, top]
   },
   Box: function(src, sizes, fnc, options) {
-    fnc = fnc || {};
-    var overflowB = document.body.style.overflow;
-    var loader = document.createElement('DIV');
+    fnc = fnc || {}
+    var overflowB = document.body.style.overflow
+    var loader = document.createElement('DIV')
     var rpc = new fastXDM.Server(VK.extend(fnc, {
       onInit: function() {
-        iframe.style.background = 'transparent';
-        iframe.style.visibility = 'visible';
-        document.body.style.overflow = 'hidden';
-        document.body.removeChild(loader);
+        iframe.style.background = 'transparent'
+        iframe.style.visibility = 'visible'
+        document.body.style.overflow = 'hidden'
+        document.body.removeChild(loader)
       },
       hide: function() {
-        iframe.style.display = 'none';
+        iframe.style.display = 'none'
       },
       tempHide: function() {
-        iframe.style.left = '-10000px';
-        iframe.style.top = '-10000px';
-        iframe.style.width = '10px';
-        iframe.style.height = '10px';
-        document.body.style.overflow = overflowB;
+        iframe.style.left = '-10000px'
+        iframe.style.top = '-10000px'
+        iframe.style.width = '10px'
+        iframe.style.height = '10px'
+        document.body.style.overflow = overflowB
       },
       destroy: function() {
         try {
-          iframe.src = 'about: blank;';
+          iframe.src = 'about: blank;'
         } catch (e) {}
-        iframe.parentNode.removeChild(iframe);
-        document.body.style.overflow = overflowB;
+        iframe.parentNode.removeChild(iframe)
+        document.body.style.overflow = overflowB
       },
       resize: function(w, h) {
       }
@@ -1816,17 +1816,17 @@ VK.Util = {
       scrolling: 'no',
       allowTransparency: true,
       style: {position: 'fixed', left: 0, top: 0, zIndex: 1002, background: VK._protocol + '//vk.com/images/upload.gif center center no-repeat transparent', padding: '0', border: '0', width: '100%', height: '100%', overflow: 'hidden', visibility: 'hidden'}
-    });
-    loader.innerHTML = '<div style="position: fixed;left: 50%;top: 50%;margin: 0px auto 0px -60px;z-index: 1002;width: 100px;"><div style="background: url(//vk.com/images/upload_inv_mono'+(window.devicePixelRatio >= 2 ? '_2x' : '')+'.gif) no-repeat 50% 50%;background-size: 64px 16px;height: 50px;position: absolute;width: 100%;z-index: 100;"></div><div style="background-color: #000;opacity: 0.7;filter: alpha(opacity=70);height: 50px;-webkit-border-radius: 5px;-khtml-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;-webkit-box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.35);-moz-box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.35);box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.35);"></div></div>';
-    document.body.insertBefore(loader, document.body.firstChild);
+    })
+    loader.innerHTML = '<div style="position: fixed;left: 50%;top: 50%;margin: 0px auto 0px -60px;z-index: 1002;width: 100px;"><div style="background: url(//vk.com/images/upload_inv_mono'+(window.devicePixelRatio >= 2 ? '_2x' : '')+'.gif) no-repeat 50% 50%;background-size: 64px 16px;height: 50px;position: absolute;width: 100%;z-index: 100;"></div><div style="background-color: #000;opacity: 0.7;filter: alpha(opacity=70);height: 50px;-webkit-border-radius: 5px;-khtml-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;-webkit-box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.35);-moz-box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.35);box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.35);"></div></div>'
+    document.body.insertBefore(loader, document.body.firstChild)
     return {
       show: function(scrollTop, height) {
-        iframe.style.display = 'block';
-        document.body.style.overflow = 'hidden';
+        iframe.style.display = 'block'
+        document.body.style.overflow = 'hidden'
       },
       hide: function() {
-        iframe.style.display = 'none';
-        document.body.style.overflow = overflowB;
+        iframe.style.display = 'none'
+        document.body.style.overflow = overflowB
       },
       iframe: iframe,
       rpc: rpc
@@ -1834,38 +1834,38 @@ VK.Util = {
   },
   addEvent: function(type, func) {
     if (window.document.addEventListener) {
-      window.document.addEventListener(type, func, false);
+      window.document.addEventListener(type, func, false)
     } else if (window.document.attachEvent) {
-      window.document.attachEvent('on'+type, func);
+      window.document.attachEvent('on'+type, func)
     }
   },
   removeEvent: function(type, func) {
     if (window.document.removeEventListener) {
-      window.document.removeEventListener(type, func, false);
+      window.document.removeEventListener(type, func, false)
     } else if (window.document.detachEvent) {
-      window.document.detachEvent('on'+type, func);
+      window.document.detachEvent('on'+type, func)
     }
   },
   ss: function(el, styles) {VK.extend(el.style, styles, true);}
-};
+}
 }
 
 // Init asynchronous library loading
-window.vkAsyncInit && setTimeout(vkAsyncInit, 0);
+window.vkAsyncInit && setTimeout(vkAsyncInit, 0)
 
 if (window.vkAsyncInitCallbacks && vkAsyncInitCallbacks.length) {
   setTimeout(function() {
-    var callback;
+    var callback
     while (callback = vkAsyncInitCallbacks.pop()) {
       try {
-        callback();
+        callback()
       } catch(e) {
         try {
-          console.error(e);
+          console.error(e)
         } catch (e2) {}
       }
     }
-  }, 0);
+  }, 0)
 }
 
 try{stManager.done('api/openapi.js');}catch(e){}

@@ -1,0 +1,47 @@
+.footer {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    z-index: 3;
+    background-color: rgb(255,87,34);
+    color: rgb(255,255,255);
+    position: fixed;
+    bottom: 0;
+}
+
+.buttons {
+    position: absolute;
+    right: 0;
+    bottom: 100%;
+    top: 0;
+}
+
+.button {
+    margin-top: -28px;
+    margin-right: 16px;
+}
+
+.small {
+    transform: scale(0.75);
+}
+
+.progress {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 0;
+    background: rgba(255,255,255, .25);
+}
+
+.info {
+    padding: 0 16px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+}

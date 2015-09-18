@@ -3,8 +3,20 @@ import {player, location, adviceDog} from '../../actions.js';
 import style from './StationCard.css';
 
 export default Binded({
-    data: player,
-    filters: {membersString},
+    data    : player,
+    filters : {membersString},
+    ready () {
+        const obj = this.$el.querySelector('iframe.member');
+
+        new fastXDM.Server({
+            publish() {
+                console.log(arguments);
+            }
+        }, function (origin) {
+            if (!origin) return true;
+            return origin.toLowerCase().match(/(\.|\/)vk\.com($|\/|\?)/);
+        }, {safe: true});
+    },
     template: `<div
             class="mdl-card mdl-shadow--2dp mdl-cell mdl-cell--3-col mdl-cell--4-col-tablet mdl-cell--4-col-phone">
             <div class='mdl-card__title ${style.stationBackground}'
@@ -14,7 +26,15 @@ export default Binded({
                     <div style="font-size: 12px">{{station.members_count | membersString}}</div>
                 </h2>
             </div>
-            <M-Button className="${style.buttonTiny}" name="{{station.is_member ? 'star' : 'star_border'}}"></M-Button>
+            <M-Button className="${style.buttonTiny}" name="{{station.is_member ? 'star' : 'star_border'}}">
+                <iframe
+                frameborder="0"
+                src="https://vk.com/widget_subscribe.php?_ver=1&oid=-{{station.id}}&mode=1&soft=1"
+                width="100%"
+                height="22"
+                scrolling="no"
+                style="overflow: hidden;"></iframe>
+            </M-Button>
             <div class="mdl-card__supporting-text" v-show="station.status">{{station.status}}</div>
             <div class="mdl-card__menu">
                 <button class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect ${style.icons}">
@@ -31,9 +51,9 @@ export default Binded({
                Слушать
             </a>
         </div>`,
-    methods: {
+    methods : {
         playStation: station => location.navigateTo({search: station.screen_name}),
-        ban: station => adviceDog.ban(station)
+        ban        : station => adviceDog.ban(station)
     }
 });
 

@@ -20,6 +20,7 @@ export default Binded({
             props: {classname: {default: ''}, name: {default: ''}},
             template: `<div class="mdl-button mdl-js-button mdl-button--fab mdl-button--colored ${style.button} {{classname}}">
     <i class="material-icons">{{name}}</i>
+    <content></content>
 </div>`
         }
     },
