@@ -31,7 +31,7 @@
 var module, i, length
 
 export function findVectorsAngleSin (v1, v2) {
-    var dot       = 0
+    var dot = 0
     if (!v1.module)
         for (i = 0, module = 0, length = v1.length, v1.module = 0; i < length; i++)
             if (v1[i]) v1.module += v1[i] * v1[i]

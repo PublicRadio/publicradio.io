@@ -18,6 +18,6 @@ export class Cell extends Component {
         const classList = [[columns, ''], [mobileColumns, '-mobile'], [tabletColumns, '-tablet']]
             .filter(([columnCount]) => columnCount)
             .map(([columnCount, postfix]) => `mdl-cell--${columnCount}${postfix}`)
-        return <div className={`mdl-cell ${classList.join(' ')}`}>{this.props.children}</div>
+        return <div className={`mdl-cell ${classList.join(' ')}`} style={{display: 'flex'}}>{this.props.children}</div>
     }
 }

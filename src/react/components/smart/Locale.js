@@ -13,10 +13,10 @@ export class Locale extends Component {
     render () {
         return this.props.value
             ? Array.isArray(this.props.value)
-                   ? <div>{this.props.value.map((string, i) => <p key={i}>{string}</p>)}</div>
-                   : <p>{this.props.value}</p>
+                   ? <div>{this.props.value.map(string => <p key={string}>{string}</p>)}</div>
+                   : <span>{this.props.value}</span>
             : this.props.children // fallback
                    ? this.props.children
-                   : <p>{`>>>No locale content for path ${this.props.path}<<<`}</p>
+                   : <span>{`>>>No locale content for path ${this.props.path}<<<`}</span>
     }
 }

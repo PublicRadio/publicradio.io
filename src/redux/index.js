@@ -6,18 +6,27 @@ const requireContextDirectory = context =>
     context.keys().reduce((acc, key) =>
         ({...acc, [key.replace(/^\.\//, '').replace(/.js$/, '')]: context(key)}), {})
 
-const actions = requireContextDirectory(require.context('./actions', false, /.*\.js/))
+
 const reducers = requireContextDirectory(require.context('./reducers', false, /.*\.js/))
+const middleware = applyMiddleware(thunkMiddleware, promiseMiddleware)
+export const store =
+    (__DEV__
+            ? compose(
+            middleware,
+            require('redux-devtools').devTools(),
+            require('redux-devtools').persistState(window.location.href.match(/[?&]debug_session=([^&]+)\b/))
+        )
+            : middleware
+    )
+    (createStore)
+    (combineReducers(reducers))
 
-export const store = applyMiddleware
-(thunkMiddleware, promiseMiddleware)
-(createStore)
-(combineReducers(reducers))
 
-store.dispatch(actions.vk.init())
+/* Initializing actions section */
 
-window.addEventListener('popstate', () => store.dispatch(actions.router.navigate()))
-window.addEventListener('pushstate', () => store.dispatch(actions.router.navigate())) //custom
-window.addEventListener('hashchange', () => store.dispatch(actions.router.navigate()))
-process.nextTick(() => store.dispatch(actions.router.navigate()))
-store.dispatch(actions.locale.setLocale())
+const actions = requireContextDirectory(require.context('./actions', false, /.*\.js/))
+
+for (let module of [actions.locale, actions.vk, actions.player, actions.UI])
+    store.dispatch(module.init())
+
+window.addEventListener('popstate', () => store.dispatch(actions.router.storeLocation()))

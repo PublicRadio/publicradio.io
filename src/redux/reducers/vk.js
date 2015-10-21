@@ -6,7 +6,7 @@ export default function (state = {userId: null, authorized: false}, action = {})
         case VK_USER_INFO:
             return action.userId === state.userId ? {...state, userInfo: action.userInfo} : state
         case VK_LOGOUT:
-            return {...state, userId: null, authorized: false}
+            return {...state, userId: null, userInfo: null, authorized: false}
         default:
             return state
     }

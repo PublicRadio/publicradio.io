@@ -6,7 +6,7 @@ export class Background extends Component {
     renderCanvasBinded = this.renderCanvas.bind(this)
     renderCanvas () {
         const canvas = this.refs.canvas
-        fillGrid(canvas, makeGrid(canvas.width = canvas.clientWidth, canvas.height = canvas.clientHeight))
+        fillGrid(canvas, makeGrid(canvas.width = canvas.parentElement.clientWidth, canvas.height = canvas.parentElement.clientHeight))
     }
 
     componentWillUnmount () {

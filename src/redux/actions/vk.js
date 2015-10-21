@@ -1,5 +1,5 @@
 import vk from '~/services/vk'
-
+import * as router from './router'
 export const VK_LOGIN = 'VK_LOGIN'
 export const VK_LOGOUT = 'VK_LOGOUT'
 export const VK_USER_INFO = 'VK_USER_INFO'
@@ -26,10 +26,15 @@ export function init () {
     }
 }
 
-export function login () {
-    vk.login()
+export function login ({success} = {}) {
+    return dispatch =>
+        vk.authorize()
+            .then(() => success && dispatch(router.navigate(success)))
+
 }
 
-export function logout () {
-    vk.logout()
+export function logout ({success} = {}) {
+    return dispatch =>
+        vk.logout()
+            .then(() => success && dispatch(router.navigate(success)))
 }

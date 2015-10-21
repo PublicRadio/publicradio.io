@@ -14,7 +14,7 @@ head
     script(src="//vk.com/js/api/openapi.js")
     script.
         if (!window.VK) document.write('<script type="text/javascript" src="./openapi.js">');
-body
+body(style="overflow: hidden")
     #root
     script(async, src="main.js?" + packageJson.version)
     if !DEBUG

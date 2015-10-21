@@ -84,8 +84,11 @@ export default class VKApi {
         //}
         return new Promise((resolve, reject) =>
             this._VK.Api.call(method, opts, ({execute_errors, error, response}) => {
-                if (execute_errors || error)
+                if (execute_errors || error) {
                     console.log({execute_errors, error, response})
+                    if (__DEV__)
+                        throw new Error
+                }
 
                 //if (error && error.error_code === 14)
                 //    this._requireCaptcha(error.captcha_sid)
