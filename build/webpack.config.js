@@ -59,15 +59,15 @@ export const module = {
         {
             test   : /\.jsx?$/,
             exclude: /node_modules/,
-            loader : 'babel-loader?optional[]=runtime&stage=0'
+            loaders: ['react-hot', 'babel?optional[]=runtime&stage=0']
         }
     ]
 };
 
 export const postcss = [
-    ['autoprefixer-core',
+    ['autoprefixer',
      DEBUG
-         ? ['Chrome >= 20']
+         ? ['Chrome >= 40']
          : [
          'Android 2.3',
          'Android >= 4',
@@ -81,7 +81,7 @@ export const postcss = [
     ['postcss-modules-local-by-default', {}]
 ].map(([module, options]) => require(module)(options));
 
-export let entry = DEBUG ? ['webpack/hot/dev-server', `${project_dir}/index.js`] : [`${project_dir}/index.js`];
+export let entry = DEBUG ? ['webpack-dev-server/client?http://localhost:8080', 'webpack/hot/dev-server', `${project_dir}/index.js`] : [`${project_dir}/index.js`];
 
 export const output = {
     publicPath   : '/',

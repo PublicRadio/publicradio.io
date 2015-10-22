@@ -48,8 +48,8 @@ export class Root extends Component {
         const stationName = commonItems[0]
         const isStation = Boolean(stationName)
         const basepath = [pageName, ...(stationName ? [stationName] : []), ...popupNames]
-        return <div style={{display: 'flex'}}>
-            <div style={{display: 'flex'}}>
+        return <div style={{display: 'flex', height: '100vh'}}>
+            <div style={{display: 'flex', height: '100vh'}}>
                 <div style={{position: 'fixed', width: '100%', height: '100%'}}><Background/></div>
                 <Drawer basepath={basepath}/>
                 <div className="mdl-layout__content">
